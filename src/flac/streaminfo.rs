@@ -24,7 +24,7 @@ impl Streaminfo {
         // 20..23: channel count
         // 23..28: bits per sample
         // 28..64: sample count
-        let sample_rate = ((d & 0xFFFF_F000_0000_0000) >> 44) as u32;
+        let sample_rate = (d >> 44) as u32;
         let sample_cnt = d & 0xFFF_FFFF;
 
         Self {
