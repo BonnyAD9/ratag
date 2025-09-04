@@ -23,6 +23,8 @@ use crate::{
 pub use self::id3v2::*;
 use self::{frame_header::*, header::*};
 
+/// Read ID3v2 tag without assuming that the reader is already at the correct
+/// position.
 pub fn from_seek(
     mut r: impl BufRead + Seek,
     store: &mut impl TagStore,
@@ -32,6 +34,7 @@ pub fn from_seek(
     from_read(r, store, trap)
 }
 
+/// Read ID3v2 tag from file.
 pub fn from_file(
     f: impl AsRef<Path>,
     store: &mut impl TagStore,
@@ -41,6 +44,8 @@ pub fn from_file(
     from_read(f, store, trap)
 }
 
+/// Read ID3v2 tag, assuming that the reader is already at the correct
+/// position.
 pub fn from_read(
     r: impl BufRead + Seek,
     store: &mut impl TagStore,

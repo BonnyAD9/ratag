@@ -2,19 +2,30 @@ use std::{path::Path, time::Duration};
 
 use crate::{DataType, Result, TagStore, read_tag_from_file, trap};
 
+/// Tag storage with basic information.
 #[derive(Debug, Default)]
 pub struct BasicTag {
+    /// Title of the song.
     pub title: Option<String>,
+    /// Albumb of the song.
     pub album: Option<String>,
+    /// Artists in this song.
     pub artists: Vec<String>,
+    /// Genres of this song.
     pub genres: Vec<String>,
+    /// Track number within the album.
     pub track: Option<u32>,
+    /// Year of release of the song.
     pub year: Option<u32>,
+    /// Disc number.
     pub disc: Option<u32>,
+    /// Length of the song.
     pub length: Option<Duration>,
 }
 
 impl BasicTag {
+    /// Reads the basic tag from file. Supports all tags supported by this
+    /// crate. Recoverable errors are skipped.
     pub fn from_file(f: impl AsRef<Path>) -> Result<Box<Self>> {
         let mut res = Box::new(Self::default());
         read_tag_from_file(f, &mut *res, &trap::Skip)?;

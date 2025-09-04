@@ -1,29 +1,33 @@
+#![doc = include_str!("../README.md")]
+
+mod basic_tag;
 mod bread;
+mod data_type;
 mod err;
+/// Module for reading ID3v1 and ID3v2 tags.
 pub mod id3;
+mod tag_read;
+mod tag_store;
+/// Module for managing how to handle errors.
+pub mod trap;
+
 use std::{
     fs::File,
     io::{BufRead, BufReader, Seek},
     path::Path,
 };
 
-use crate::id3::Id3;
-
-use self::bread::Bread;
-mod basic_tag;
-mod data_type;
-mod tag_read;
-mod tag_store;
-pub mod trap;
-
-pub use place_macro::place;
+use crate::{bread::Bread, id3::Id3, trap::*};
 
 pub use self::{
     basic_tag::*, data_type::*, err::*, tag_read::*, tag_store::*,
 };
 
-use self::trap::*;
-
+/// Reads from reader with the first tag format that succeeds.
+///
+/// # Errors
+/// - If reading tag fails for one of the formats.
+/// - [`Error::NoTag`] if none of the tags are included in the file.
 pub fn read_any_tag<
     'a,
     R: 'a,
@@ -46,6 +50,13 @@ pub fn read_any_tag<
     Err(Error::NoTag)
 }
 
+/// Reads from reader with the first tag format that succeeds.
+///
+/// This also prioritizes tag formats based on the extension of the file.
+///
+/// # Errors
+/// - If reading tag fails for one of the formats.
+/// - [`Error::NoTag`] if none of the tags are included in the file.
 pub fn read_any_tag_from_file<
     'a,
     S: 'a,
@@ -77,6 +88,11 @@ pub fn read_any_tag_from_file<
     read_any_tag(primary.into_iter().chain(secondary), &mut r, store, trap)
 }
 
+/// Reads tag with any of the tags supported by this crate.
+///
+/// # Errors
+/// - Reading tag fails.
+/// - [`Error::NoTag`] if the file contains no supported tags.
 pub fn read_tag<R: BufRead + Seek, S: TagStore, T: Trap>(
     r: &mut R,
     store: &mut S,
@@ -86,6 +102,13 @@ pub fn read_tag<R: BufRead + Seek, S: TagStore, T: Trap>(
     read_any_tag(tags, r, store, trap)
 }
 
+/// Reads tag with any of the tag formats supported by this crate.
+///
+/// This also prioritizes the formats based on the file extension.
+///
+/// # Errors
+/// - Reading tag fails.
+/// - [`Error::NoTag`] if the file contains no supported tags.
 pub fn read_tag_from_file<S: TagStore, T: Trap>(
     f: impl AsRef<Path>,
     store: &mut S,

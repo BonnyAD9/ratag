@@ -2,6 +2,7 @@ use std::io::{Read, Seek};
 
 use crate::{Result, TagRead, TagStore, id3::v1::from_seek, trap::Trap};
 
+/// Tag reader for ID3v1.
 #[derive(Debug)]
 pub struct Id3v1;
 

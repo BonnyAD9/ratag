@@ -6,9 +6,13 @@ mod skip;
 
 pub use self::skip::*;
 
+/// Trap decides what will happen on recoverable errors.
 pub trait Trap {
+    /// What to do if this error occurs. If this returns [`Err`], error is
+    /// returned, otherwise the error is recovered and skiped.
     fn error(&self, err: Error) -> Result<()>;
 
+    /// What to do with decoding errors.
     fn decoder_trap(&self) -> DecoderTrap;
 }
 

@@ -8,15 +8,24 @@ use encoding::{Encoding, all::ISO_8859_1};
 
 use crate::{Error, Result, TagStore, id3::genres::get_genre, trap::Trap};
 
+/// Data stored in ID3v1 tag.
 #[derive(Debug)]
 pub struct Id3v1Tag {
+    /// Title of the song.
     pub title: String,
+    /// Artist of the song.
     pub artist: String,
+    /// Album name.
     pub album: String,
+    /// Year of release.
     pub year: Option<u16>,
+    /// Comment.
     pub comment: String,
+    /// Genre.
     pub genre: u8,
+    /// Track number within the album.
     pub track: Option<u8>,
+    /// Additional genre specification.
     pub sub_genre: Option<String>,
 }
 
@@ -24,10 +33,13 @@ impl Id3v1Tag {
     const LEN0: usize = 128;
     const LEN2: usize = 256;
 
+    /// Read ID3v1 tag from file.
     pub fn from_file(p: impl AsRef<Path>, trap: &impl Trap) -> Result<Self> {
         Self::from_seek(File::open(p)?, trap)
     }
 
+    /// Read ID3v1 tag from reader without assuming that it is at the proper
+    /// position.
     pub fn from_seek(
         mut read: impl Seek + Read,
         trap: &impl Trap,
@@ -36,6 +48,8 @@ impl Id3v1Tag {
         Self::from_read(read, trap)
     }
 
+    /// Read ID3v1 tag from reader, assuming that it is already at the proper
+    /// position.
     pub fn from_read(read: impl Read, trap: &impl Trap) -> Result<Self> {
         let mut buf = [0; Self::LEN2];
         let len = try_read_exact(read, &mut buf)?;
@@ -49,6 +63,8 @@ impl Id3v1Tag {
         }
     }
 
+    /// Parse ID3v1 tag from read data. Data must be either 128 or 256 bytes
+    /// long.
     pub fn from_bytes(data: &[u8], trap: &impl Trap) -> Result<Self> {
         let (v11, v12) = match data.len() {
             Self::LEN0 => (data, None),
@@ -112,7 +128,12 @@ impl Id3v1Tag {
         Ok(res)
     }
 
-    pub fn store(self, store: &mut impl TagStore) {
+    /// Store the ID3v1 data into a tag storage.
+    pub fn store(
+        self,
+        store: &mut impl TagStore,
+        trap: &impl Trap,
+    ) -> Result<()> {
         if !self.title.is_empty() {
             store.set_title(Some(self.title));
         }
@@ -129,6 +150,8 @@ impl Id3v1Tag {
         let mut genres = vec![];
         if let Some(g) = get_genre(self.genre) {
             genres.push(g.to_string());
+        } else {
+            trap.error(Error::InvalidGenreRef)?;
         }
         genres.extend(self.sub_genre);
         if !genres.is_empty() {
@@ -138,6 +161,8 @@ impl Id3v1Tag {
         if let Some(t) = self.track {
             store.set_track(Some(t as u32));
         }
+
+        Ok(())
     }
 }
 

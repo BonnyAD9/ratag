@@ -1,5 +1,7 @@
 mod genres;
+/// Module for reading ID3v1 tags.
 pub mod v1;
+/// Module for reading ID3v2 tags.
 pub mod v2;
 
 use std::{
@@ -12,6 +14,7 @@ use crate::{Error, Result, TagRead, TagStore, trap::Trap};
 
 use self::genres::*;
 
+/// Read data from both ID3v1 and ID3v2. ID3v2 is prioritized.
 #[derive(Debug)]
 pub struct Id3;
 
@@ -25,6 +28,8 @@ impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Id3 {
     }
 }
 
+/// Read ID3 tags. This will seek to the proper positions within the file.
+/// Data from ID3v2 is prioritized.
 pub fn from_seek<R: BufRead + Seek>(
     r: &mut R,
     store: &mut impl TagStore,
@@ -40,6 +45,7 @@ pub fn from_seek<R: BufRead + Seek>(
     }
 }
 
+/// Read ID3 tags from file. Data from ID3v2 is prioritized.
 pub fn from_file(
     path: impl AsRef<Path>,
     store: &mut impl TagStore,
