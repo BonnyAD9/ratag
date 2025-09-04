@@ -1,6 +1,6 @@
-use std::{fs::File, io::BufReader, process::ExitCode};
+use std::process::ExitCode;
 
-use ratag::{BasicTag, Result, id3::read_id3v2, trap};
+use ratag::{BasicTag, Result, id3, trap};
 
 fn main() -> ExitCode {
     match start() {
@@ -14,10 +14,11 @@ fn main() -> ExitCode {
 
 fn start() -> Result<()> {
     let mut tag = BasicTag::default();
-    let f = BufReader::new(File::open(
+    id3::v2::from_file(
         "/home/kubas/music/4tet - 1st - 01 Addams Family Theme.mp3",
-    )?);
-    read_id3v2(f, &mut tag, &trap::Skip)?;
+        &mut tag,
+        &trap::Skip,
+    )?;
     println!("{tag:#?}");
     Ok(())
 }

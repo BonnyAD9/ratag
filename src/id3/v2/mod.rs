@@ -1,12 +1,15 @@
+mod frame;
 mod frame_header;
 mod header;
+mod id3v2;
 
 use std::{
-    io::{BufRead, Seek},
+    fs::File,
+    io::{BufRead, BufReader, Seek},
+    path::Path,
     str::FromStr,
     time::Duration,
 };
-mod frame;
 
 use encoding::{
     Encoding,
@@ -17,9 +20,28 @@ use crate::{
     Bread, DataType, Error, Result, TagStore, Trap, TrapExt, id3::get_genre,
 };
 
+pub use self::id3v2::*;
 use self::{frame_header::*, header::*};
 
-pub fn read_id3v2(
+pub fn from_seek(
+    mut r: impl BufRead + Seek,
+    store: &mut impl TagStore,
+    trap: &impl Trap,
+) -> Result<()> {
+    r.rewind()?;
+    from_read(r, store, trap)
+}
+
+pub fn from_file(
+    f: impl AsRef<Path>,
+    store: &mut impl TagStore,
+    trap: &impl Trap,
+) -> Result<()> {
+    let f = BufReader::new(File::open(f)?);
+    from_read(f, store, trap)
+}
+
+pub fn from_read(
     r: impl BufRead + Seek,
     store: &mut impl TagStore,
     trap: &impl Trap,

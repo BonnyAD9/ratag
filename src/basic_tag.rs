@@ -1,6 +1,6 @@
-use std::time::Duration;
+use std::{path::Path, time::Duration};
 
-use crate::{DataType, TagStore};
+use crate::{DataType, Result, TagStore, read_tag_from_file, trap};
 
 #[derive(Debug, Default)]
 pub struct BasicTag {
@@ -12,6 +12,14 @@ pub struct BasicTag {
     pub year: Option<u32>,
     pub disc: Option<u32>,
     pub length: Option<Duration>,
+}
+
+impl BasicTag {
+    pub fn from_file(f: impl AsRef<Path>) -> Result<Box<Self>> {
+        let mut res = Box::new(Self::default());
+        read_tag_from_file(f, &mut *res, &trap::Skip)?;
+        Ok(res)
+    }
 }
 
 impl TagStore for BasicTag {
