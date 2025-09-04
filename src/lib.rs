@@ -4,12 +4,14 @@ mod basic_tag;
 mod bread;
 mod data_type;
 mod err;
+pub mod flac;
 /// Module for reading ID3v1 and ID3v2 tags.
 pub mod id3;
 mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
 pub mod trap;
+pub mod vorbis;
 
 use std::{
     fs::File,

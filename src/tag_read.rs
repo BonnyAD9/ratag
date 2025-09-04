@@ -9,7 +9,7 @@ pub trait TagRead<R, S, T> {
     /// Read the tag from the given reader. The implementation must not assume
     /// that the reader is at the correct position within file and it should
     /// seek to the proper place within the file.
-    /// 
+    ///
     /// # Errors
     /// - [`Error::NoTag`] if the given file doesn't contain this tag. In this
     ///   case, implementation must not write any data to `store`.
