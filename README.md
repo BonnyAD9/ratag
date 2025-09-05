@@ -16,8 +16,8 @@ Supported tag formats:
 - `ID3v2`
     - Only version `ID3v2.3`
     - Unsynchronization, compression and ecryption is not supported.
-    - Only frames `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`, `TLEN`, `TPE1`,
-      `TPOS`, `TRCK` and `TYER`
+    - Only frames `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`, `TIME`, `TLEN`,
+      `TPE1`, `TPOS`, `TRCK` and `TYER`
 - `flac`
     - Song length.
     - Vorbis comment can extract only `TITLE`, `ALBUM`, `TRACKNUMBER`,
