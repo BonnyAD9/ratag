@@ -10,6 +10,10 @@ mod id3v1_tag;
 
 pub use self::{id3v1::*, id3v1_tag::*};
 
+// Implementation is based on:
+// - https://id3.org/ID3v1
+// - https://www.birdcagesoft.com/ID3v12.txt
+
 /// Read ID3v1 tag from reader, assuming that it is already at the correct
 /// position.
 pub fn from_read(

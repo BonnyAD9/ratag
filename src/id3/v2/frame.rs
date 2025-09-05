@@ -6,6 +6,8 @@ pub const TCON: u32 = u32::from_be_bytes(*b"TCON");
 pub const TDAT: u32 = u32::from_be_bytes(*b"TDAT");
 /// Title
 pub const TIT2: u32 = u32::from_be_bytes(*b"TIT2");
+/// Time
+pub const TIME: u32 = u32::from_be_bytes(*b"TIME");
 /// Length
 pub const TLEN: u32 = u32::from_be_bytes(*b"TLEN");
 /// Artists

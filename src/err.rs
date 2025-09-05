@@ -40,4 +40,7 @@ pub enum Error {
     /// Any IO error.
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    /// Failed to parse date/time
+    #[error(transparent)]
+    DateTime(#[from] time::error::Parse),
 }

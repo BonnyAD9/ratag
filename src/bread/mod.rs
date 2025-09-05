@@ -61,6 +61,15 @@ impl<R: Seek> Bread<R> {
     pub fn seek_by(&mut self, amt: i64) -> Result<u64> {
         self.seek(SeekFrom::Current(amt))
     }
+
+    pub fn useek_by(&mut self, mut amt: u64) -> Result<u64> {
+        const MAXI: u64 = i64::MAX as u64;
+        while amt > MAXI {
+            amt -= MAXI;
+            self.seek_by(i64::MAX)?;
+        }
+        self.seek_by(amt as i64)
+    }
 }
 
 impl<R: BufRead> Bread<R> {

@@ -1,9 +1,10 @@
 use std::{collections::HashMap, io::BufRead, str::FromStr};
 
 use encoding::{Encoding, all::UTF_8};
+use time::{Date, format_description::well_known};
 
 use crate::{
-    Comment, DataType, Error, Result, TagStore,
+    Comment, DataType, Error, Result, TagStore, TagStoreExt,
     bread::Bread,
     trap::{Trap, TrapExt},
 };
@@ -102,11 +103,8 @@ impl VorbisTag {
                     if store.stores_data(DataType::Year)
                         || store.stores_data(DataType::Date) =>
                 {
-                    if let Some((y, d)) =
-                        trap.res(parse_date(&first(v), trap))?
-                    {
-                        store.set_year(Some(y));
-                        store.set_date(d);
+                    if let Some(d) = trap.res(parse_date(&first(v)))? {
+                        store.set_date2(d);
                     }
                 }
                 "DISCNUMBER" if store.stores_data(DataType::Disc) => {
@@ -141,45 +139,10 @@ fn parse_num<T: FromStr>(s: &str) -> Result<T> {
     s.parse().map_err(|_| Error::InvalidDigit)
 }
 
-fn parse_date(
-    date: &str,
-    trap: &impl Trap,
-) -> Result<(u32, Option<(u32, u32)>)> {
-    let mut spl = date
-        .split_once(' ')
-        .map(|(d, _)| d)
-        .unwrap_or(date)
-        .split('-');
+fn parse_date(date: &str) -> Result<Date> {
+    let date = date.split_once(' ').map(|(d, _)| d).unwrap_or(date);
 
-    let Some(y) = spl.next() else {
-        return Err(Error::InvalidDate);
-    };
-
-    let y = parse_num(y)?;
-
-    let Some(m) = spl.next() else {
-        return Ok((y, None));
-    };
-
-    let Some(d) = spl.next() else {
-        trap.error(Error::InvalidDate)?;
-        return Ok((y, None));
-    };
-
-    if spl.next().is_some() {
-        return Err(Error::InvalidDate);
-    }
-
-    let m = trap.res(parse_num(m))?;
-    let d = trap.res(parse_num(d))?;
-
-    if let Some(m) = m
-        && let Some(d) = d
-    {
-        Ok((y, Some((m, d))))
-    } else {
-        Ok((y, None))
-    }
+    Ok(Date::parse(date, &well_known::Iso8601::PARSING)?)
 }
 
 fn read_string(data: &[u8], trap: &impl Trap) -> Result<String> {

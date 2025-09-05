@@ -11,5 +11,10 @@ fn main() -> Result<()> {
     )?;
     println!("{:#?}", tag);
 
+    let tag = BasicTag::from_file(
+        "/home/kubas/music/Imagine Dragons - iTunes Session - 01 It's Time.m4a",
+    )?;
+    println!("{:#?}", tag);
+
     Ok(())
 }

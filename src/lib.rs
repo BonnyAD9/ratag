@@ -9,6 +9,8 @@ mod err;
 pub mod flac;
 /// Module for reading ID3v1 and ID3v2 tags.
 pub mod id3;
+/// Module for reading tags for mp4 files.
+pub mod mp4;
 mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
@@ -22,7 +24,7 @@ use std::{
     path::Path,
 };
 
-use crate::{bread::Bread, flac::Flac, id3::Id3, trap::*};
+use crate::{bread::Bread, flac::Flac, id3::Id3, mp4::Mp4, trap::*};
 
 pub use self::{
     basic_tag::*, comment::*, data_type::*, err::*, tag_read::*, tag_store::*,
@@ -103,7 +105,7 @@ pub fn read_tag<R: BufRead + Seek, S: TagStore, T: Trap>(
     store: &mut S,
     trap: &T,
 ) -> Result<()> {
-    let tags: [&dyn TagRead<R, S, T>; _] = [&Id3, &Flac];
+    let tags: [&dyn TagRead<R, S, T>; _] = [&Id3, &Flac, &Mp4];
     read_any_tag(tags, r, store, trap)
 }
 
@@ -119,7 +121,7 @@ pub fn read_tag_from_file<S: TagStore, T: Trap>(
     store: &mut S,
     trap: &T,
 ) -> Result<()> {
-    let tags: [&dyn TagRead<_, S, T>; _] = [&Id3, &Flac];
+    let tags: [&dyn TagRead<_, S, T>; _] = [&Id3, &Flac, &Mp4];
     read_any_tag_from_file(tags, f, store, trap)
 }
 

@@ -1,4 +1,4 @@
-mod genres;
+pub(crate) mod genres;
 /// Module for reading ID3v1 tags.
 pub mod v1;
 /// Module for reading ID3v2 tags.

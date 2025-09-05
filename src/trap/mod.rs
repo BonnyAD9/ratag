@@ -3,8 +3,9 @@ pub use encoding::DecoderTrap;
 use crate::{Error, Result};
 
 mod skip;
+mod warn;
 
-pub use self::skip::*;
+pub use self::{skip::*, warn::*};
 
 /// Trap decides what will happen on recoverable errors.
 pub trait Trap {
@@ -18,6 +19,8 @@ pub trait Trap {
 
 pub(crate) trait TrapExt {
     fn res<T>(&self, res: Result<T>) -> Result<Option<T>>;
+
+    fn prop<T>(&self, res: Result<T>) -> Result<()>;
 }
 
 impl<T: Trap> TrapExt for T {
@@ -25,6 +28,13 @@ impl<T: Trap> TrapExt for T {
         match res {
             Err(e) => self.error(e).map(|_| None),
             Ok(r) => Ok(Some(r)),
+        }
+    }
+
+    fn prop<U>(&self, res: Result<U>) -> Result<()> {
+        match res {
+            Err(e) => self.error(e),
+            Ok(_) => Ok(()),
         }
     }
 }

@@ -6,6 +6,11 @@ mod vorbis_tag;
 
 pub use self::vorbis_tag::*;
 
+// Implementation is based on:
+// - https://xiph.org/vorbis/doc/v-comment.html
+// - https://wiki.xiph.org/Field_names
+// - https://age.hobba.nl/audio/mirroredpages/ogg-tagging.html
+
 /// Read metadata from vorbis comment. The stream must have proper position.
 pub fn from_read(
     r: impl BufRead,

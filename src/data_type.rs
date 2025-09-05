@@ -17,6 +17,8 @@ pub enum DataType {
     Year,
     /// Month and day of month of release of the song.
     Date,
+    /// Time of release of the song.
+    Time,
     /// Disc on which the song is.
     Disc,
     /// Total number of discs.

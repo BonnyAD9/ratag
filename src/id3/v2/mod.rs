@@ -24,6 +24,8 @@ use crate::{
 pub use self::id3v2::*;
 use self::{frame_header::*, header::*};
 
+// Implementation is based on: https://id3.org/id3v2.3.0
+
 /// Read ID3v2 tag without assuming that the reader is already at the correct
 /// position.
 pub fn from_seek(
@@ -101,13 +103,20 @@ pub fn from_read(
                 }
             }
             frame::TDAT if store.stores_data(DataType::Date) => {
-                if let Some(d) = r.witht(hsize, trap, read_date)? {
+                if let Some(d) = r.witht(hsize, trap, read_date_time)? {
                     store.set_date(Some(d));
                 }
             }
             frame::TIT2 if store.stores_data(DataType::Title) => {
                 if let Some(t) = r.witht(hsize, trap, read_string)? {
                     store.set_title(Some(t));
+                }
+            }
+            frame::TIME if store.stores_data(DataType::Time) => {
+                if let Some((h, m)) = r.witht(hsize, trap, read_date_time)? {
+                    let t =
+                        Duration::from_secs(h as u64 * 3600 + m as u64 * 60);
+                    store.set_time(Some(t));
                 }
             }
             frame::TLEN if store.stores_data(DataType::Length) => {
@@ -176,7 +185,7 @@ fn read_comment(mut data: &[u8], trap: &impl Trap) -> Result<Comment> {
     })
 }
 
-fn read_date(data: &[u8], trap: &impl Trap) -> Result<(u32, u32)> {
+fn read_date_time(data: &[u8], trap: &impl Trap) -> Result<(u32, u32)> {
     let s = read_string(data, trap)?;
     if s.len() != 4 {
         return Err(Error::InvalidDate);

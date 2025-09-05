@@ -15,6 +15,8 @@ use crate::{
     vorbis,
 };
 
+// Implementation is based on: https://www.rfc-editor.org/rfc/rfc9639.html
+
 /// TagReader for flac files.
 #[derive(Debug)]
 pub struct Flac;

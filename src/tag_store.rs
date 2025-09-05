@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use time::{Date, Time, UtcDateTime};
+
 use crate::{Comment, DataType};
 
 /// Generic storage for data from tag.
@@ -39,6 +41,9 @@ pub trait TagStore {
     /// Set the date of release of the song.
     fn set_date(&mut self, month_day: Option<(u32, u32)>) {}
 
+    /// Set the time of release.
+    fn set_time(&mut self, time: Option<Duration>) {}
+
     /// Set disc number.
     fn set_disc(&mut self, disc: Option<u32>) {}
 
@@ -50,4 +55,28 @@ pub trait TagStore {
 
     /// Set the comments.
     fn set_comments(&mut self, comments: Vec<Comment>) {}
+}
+
+pub(crate) trait TagStoreExt {
+    fn set_date2(&mut self, date: Date);
+
+    fn set_date_time(&mut self, dt: UtcDateTime);
+}
+
+impl<T: TagStore> TagStoreExt for T {
+    fn set_date2(&mut self, date: Date) {
+        self.set_year(Some(date.year() as u32));
+
+        let month = u8::from(date.month()) as u32;
+        let day = date.day() as u32;
+        self.set_date((month != 1 || day != 0).then_some((month, day)));
+    }
+
+    fn set_date_time(&mut self, dt: UtcDateTime) {
+        self.set_date2(dt.date());
+
+        let time = dt.time().duration_since(Time::from_hms(0, 0, 0).unwrap());
+        let time = Duration::from_secs_f64(time.as_seconds_f64());
+        self.set_time((time != Duration::ZERO).then_some(time));
+    }
 }
