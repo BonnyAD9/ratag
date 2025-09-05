@@ -2,8 +2,10 @@
 
 mod basic_tag;
 mod bread;
+mod comment;
 mod data_type;
 mod err;
+/// Module for reading metadata from flac files.
 pub mod flac;
 /// Module for reading ID3v1 and ID3v2 tags.
 pub mod id3;
@@ -11,6 +13,7 @@ mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
 pub mod trap;
+/// Module for parsing vorbis comments.
 pub mod vorbis;
 
 use std::{
@@ -19,10 +22,10 @@ use std::{
     path::Path,
 };
 
-use crate::{bread::Bread, id3::Id3, trap::*};
+use crate::{bread::Bread, flac::Flac, id3::Id3, trap::*};
 
 pub use self::{
-    basic_tag::*, data_type::*, err::*, tag_read::*, tag_store::*,
+    basic_tag::*, comment::*, data_type::*, err::*, tag_read::*, tag_store::*,
 };
 
 /// Reads from reader with the first tag format that succeeds.
@@ -100,7 +103,7 @@ pub fn read_tag<R: BufRead + Seek, S: TagStore, T: Trap>(
     store: &mut S,
     trap: &T,
 ) -> Result<()> {
-    let tags: [&dyn TagRead<R, S, T>; _] = [&Id3];
+    let tags: [&dyn TagRead<R, S, T>; _] = [&Id3, &Flac];
     read_any_tag(tags, r, store, trap)
 }
 
@@ -116,7 +119,7 @@ pub fn read_tag_from_file<S: TagStore, T: Trap>(
     store: &mut S,
     trap: &T,
 ) -> Result<()> {
-    let tags: [&dyn TagRead<_, S, T>; _] = [&Id3];
+    let tags: [&dyn TagRead<_, S, T>; _] = [&Id3, &Flac];
     read_any_tag_from_file(tags, f, store, trap)
 }
 

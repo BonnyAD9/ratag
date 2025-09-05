@@ -15,10 +15,14 @@ pub enum DataType {
     TrackCount,
     /// Year of release of the song.
     Year,
+    /// Month and day of month of release of the song.
+    Date,
     /// Disc on which the song is.
     Disc,
     /// Total number of discs.
     DiscCount,
     /// Length of the song.
     Length,
+    /// Additional comments.
+    Comments,
 }

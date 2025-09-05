@@ -13,11 +13,12 @@ use std::{
 
 use encoding::{
     Encoding,
-    all::{ISO_8859_1, UTF_16BE, UTF_16LE},
+    all::{ASCII, ISO_8859_1, UTF_16BE, UTF_16LE},
 };
 
 use crate::{
-    Bread, DataType, Error, Result, TagStore, Trap, TrapExt, id3::get_genre,
+    Bread, Comment, DataType, Error, Result, TagStore, Trap, TrapExt,
+    id3::get_genre,
 };
 
 pub use self::id3v2::*;
@@ -70,6 +71,8 @@ pub fn from_read(
         pos += 4;
     }
 
+    let mut comments = vec![];
+
     while !store.done() && pos < header.size {
         let mut header: FrameHeader = r.get()?;
         pos += header.size + 10;
@@ -95,6 +98,11 @@ pub fn from_read(
             frame::TCON if store.stores_data(DataType::Genres) => {
                 if let Some(g) = r.witht(hsize, trap, read_genres)? {
                     store.set_genres(g);
+                }
+            }
+            frame::TDAT if store.stores_data(DataType::Date) => {
+                if let Some(d) = r.witht(hsize, trap, read_date)? {
+                    store.set_date(Some(d));
                 }
             }
             frame::TIT2 if store.stores_data(DataType::Title) => {
@@ -135,13 +143,49 @@ pub fn from_read(
                     store.set_year(Some(a));
                 }
             }
+            frame::COMM if store.stores_data(DataType::Comments) => {
+                comments.extend(r.witht(hsize, trap, read_comment)?);
+            }
             _ => {
                 r.seek_by(header.size as i64)?;
             }
         }
     }
 
+    store.set_comments(comments);
+
     Ok(())
+}
+
+fn read_comment(mut data: &[u8], trap: &impl Trap) -> Result<Comment> {
+    let enc = data[0];
+    let language = trap.res(
+        ASCII
+            .decode(&data[1..4], trap.decoder_trap())
+            .map_err(|_| Error::InvalidEncoding),
+    )?;
+
+    data = &data[4..];
+    let (desc, len) = read_string_enc(enc, data, trap)?;
+    let (value, _) = read_string_enc(enc, &data[len..], trap)?;
+
+    Ok(Comment {
+        language,
+        desciption: Some(desc),
+        value,
+    })
+}
+
+fn read_date(data: &[u8], trap: &impl Trap) -> Result<(u32, u32)> {
+    let s = read_string(data, trap)?;
+    if s.len() != 4 {
+        return Err(Error::InvalidDate);
+    }
+
+    let d = s[..2].parse().map_err(|_| Error::InvalidDigit)?;
+    let m = s[2..].parse().map_err(|_| Error::InvalidDigit)?;
+
+    Ok((m, d))
 }
 
 fn read_position(data: &[u8], trap: &impl Trap) -> Result<(u32, Option<u32>)> {
@@ -210,27 +254,49 @@ fn read_genres(data: &[u8], trap: &impl Trap) -> Result<Vec<String>> {
 }
 
 fn read_string(data: &[u8], trap: &impl Trap) -> Result<String> {
-    let end: &[_] = match data[0] {
+    if data.is_empty() {
+        return Err(Error::InvalidLength);
+    }
+
+    read_string_enc(data[0], &data[1..], trap).map(|(s, _)| s)
+}
+
+fn read_string_enc(
+    enc: u8,
+    d: &[u8],
+    trap: &impl Trap,
+) -> Result<(String, usize)> {
+    let null: &[_] = match enc {
         0 => &[0],    // ISO-8859-1
         1 => &[0, 0], // UTF-16
         _ => return Err(Error::Unsupported("Unknown encoding in ID3v2.")),
     };
 
-    let end = data[1..].windows(end.len()).position(|a| a == end);
+    let end = d.windows(null.len()).position(|a| a == null);
 
-    let end = if let Some(end) = end {
-        end + 1
+    let mut end = if let Some(end) = end {
+        end
     } else {
         trap.error(Error::StringNotTerminated)?;
-        data.len()
+        d.len()
     };
 
     let trap = trap.decoder_trap();
     let e = |_| Error::InvalidEncoding;
-    match data {
-        [0, ..] => ISO_8859_1.decode(&data[1..end], trap).map_err(e),
-        [1, 0xfe, 0xff, ..] => UTF_16BE.decode(&data[3..end], trap).map_err(e),
-        [1, 0xff, 0xfe, ..] => UTF_16LE.decode(&data[3..end], trap).map_err(e),
-        _ => Err(Error::InvalidEncoding),
+    let res = match (enc, d) {
+        (0, _) => ISO_8859_1.decode(&d[..end], trap).map_err(e)?,
+        (1, [0xfe, 0xff, ..]) => {
+            UTF_16BE.decode(&d[2..end], trap).map_err(e)?
+        }
+        (1, [0xff, 0xfe, ..]) => {
+            UTF_16LE.decode(&d[2..end], trap).map_err(e)?
+        }
+        _ => return Err(Error::InvalidEncoding),
+    };
+
+    if end != d.len() {
+        end += null.len();
     }
+
+    Ok((res, end))
 }

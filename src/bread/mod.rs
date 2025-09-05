@@ -1,11 +1,12 @@
-use std::io::{BufRead, ErrorKind, Read, Seek, SeekFrom};
+use std::io::{BufRead, Read, Seek, SeekFrom};
 
 mod breadable;
 mod breadable_be;
+mod breadable_le;
 
-use crate::{Error, Result, Trap, TrapExt};
+use crate::{Result, Trap, TrapExt};
 
-pub use self::{breadable::*, breadable_be::*};
+pub use self::{breadable::*, breadable_be::*, breadable_le::*};
 
 pub struct Bread<R> {
     buf: Vec<u8>,
@@ -31,24 +32,18 @@ impl<R: Read> Bread<R> {
         T::from_bread_be(self)
     }
 
+    pub fn get_le<T: BreadableLe<R>>(&mut self) -> Result<T> {
+        T::from_bread_le(self)
+    }
+
+    pub fn next(&mut self) -> Result<u8> {
+        self.read_exact(1)?;
+        Ok(self.buf[0])
+    }
+
     pub fn arr<const LEN: usize>(&mut self) -> Result<&[u8; LEN]> {
         self.read_exact(LEN)?;
         Ok(self.buf[..LEN].try_into().unwrap())
-    }
-
-    pub fn _try_read_exact(&mut self, len: usize) -> Result<&[u8]> {
-        self.make_size(len);
-        let mut pos = 0;
-        while pos < len {
-            match self.read.read(&mut self.buf[pos..]) {
-                Ok(0) => return Ok(&self.buf[..pos]),
-                Ok(s) => pos += s,
-                Err(e) if e.kind() == ErrorKind::Interrupted => {}
-                Err(e) => return Err(Error::Io(e)),
-            }
-        }
-
-        Ok(&self.buf[pos..])
     }
 
     fn make_size(&mut self, len: usize) {

@@ -20,7 +20,7 @@ pub struct Id3;
 
 impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Id3 {
     fn extensions(&self) -> &[&str] {
-        &["mp3"]
+        &["mp3", "mpga", "bit"]
     }
 
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {

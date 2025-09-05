@@ -17,7 +17,7 @@ impl MetadataBlockHeader {
 
     pub fn from_bytes(mut d: [u8; 4]) -> Self {
         let last = (d[0] & 0x80) == 0x80;
-        let block_type = d[0] | 0x7f;
+        let block_type = d[0] & 0x7f;
         d[0] = 0;
         let length = u32::from_be_bytes(d);
         Self {

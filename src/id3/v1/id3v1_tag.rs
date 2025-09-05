@@ -6,7 +6,9 @@ use std::{
 
 use encoding::{Encoding, all::ISO_8859_1};
 
-use crate::{Error, Result, TagStore, id3::genres::get_genre, trap::Trap};
+use crate::{
+    Comment, Error, Result, TagStore, id3::genres::get_genre, trap::Trap,
+};
 
 /// Data stored in ID3v1 tag.
 #[derive(Debug)]
@@ -145,6 +147,9 @@ impl Id3v1Tag {
         }
         if let Some(y) = self.year {
             store.set_year(Some(y as u32));
+        }
+        if !self.comment.is_empty() {
+            store.set_comments(vec![Comment::from_value(self.comment)]);
         }
 
         let mut genres = vec![];

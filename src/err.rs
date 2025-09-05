@@ -25,6 +25,15 @@ pub enum Error {
     /// String is nor properly terminated. This is usually recoverable.
     #[error("String is not properly terminated.")]
     StringNotTerminated,
+    /// Invalid vorbis comment. Missing `=` in comment.
+    #[error("Invalid vorbis comment. (no `=` in comment)")]
+    InvalidVorbisComment,
+    /// Vorbis framing bit is not set.
+    #[error("Vorbis framing bit is not set.")]
+    InvalidVorbisFramingBit,
+    /// Invalid date format.
+    #[error("Invalid date format.")]
+    InvalidDate,
     /// Feature required to parse the tag is not supported.
     #[error("Not supported: {0}.")]
     Unsupported(&'static str),
