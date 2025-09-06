@@ -18,6 +18,9 @@ pub enum Error {
     /// Invalid genre reference in id3. This is usually recoverable.
     #[error("Invalid id3v1 genre reference.")]
     InvalidGenreRef,
+    /// Invalid picture kind.
+    #[error("Invalid picture kind.")]
+    InvalidPictureKind,
     /// Invalid digit when parsing string to number. This is usually
     /// recoverable.
     #[error("Invalid digit in numeric string.")]

@@ -1,3 +1,5 @@
+use crate::PictureKind;
+
 /// Type of data that can be within tag.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
@@ -27,4 +29,6 @@ pub enum DataType {
     Length,
     /// Additional comments.
     Comments,
+    /// Picture.
+    Picture(PictureKind),
 }

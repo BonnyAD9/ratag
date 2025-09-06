@@ -14,6 +14,7 @@ pub struct MetadataBlockHeader {
 impl MetadataBlockHeader {
     pub const STREAMINFO: u8 = 0;
     pub const VORBISCOMMENT: u8 = 4;
+    pub const PICTURE: u8 = 6;
 
     pub fn from_bytes(mut d: [u8; 4]) -> Self {
         let last = (d[0] & 0x80) == 0x80;

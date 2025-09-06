@@ -24,6 +24,12 @@ impl<R: Read> Bread<R> {
         Ok(&self.buf)
     }
 
+    pub fn read_exact_owned(&mut self, len: usize) -> Result<Vec<u8>> {
+        let mut buf = vec![0; len];
+        self.read.read_exact(&mut buf)?;
+        Ok(buf)
+    }
+
     pub fn get<T: Breadable<R>>(&mut self) -> Result<T> {
         T::from_bread(self)
     }
@@ -58,11 +64,15 @@ impl<R: Seek> Bread<R> {
         Ok(self.read.seek(from)?)
     }
 
-    pub fn seek_by(&mut self, amt: i64) -> Result<u64> {
-        self.seek(SeekFrom::Current(amt))
+    pub fn seek_by(&mut self, amt: i64) -> Result<()> {
+        if amt == 0 {
+            return Ok(());
+        }
+        self.seek(SeekFrom::Current(amt))?;
+        Ok(())
     }
 
-    pub fn useek_by(&mut self, mut amt: u64) -> Result<u64> {
+    pub fn useek_by(&mut self, mut amt: u64) -> Result<()> {
         const MAXI: u64 = i64::MAX as u64;
         while amt > MAXI {
             amt -= MAXI;
@@ -86,6 +96,56 @@ impl<R: BufRead> Bread<R> {
         let res = f(&buf[..len], trap);
         self.read.consume(len);
         trap.res(res)
+    }
+
+    pub fn witht_until<T, Tr: Trap>(
+        &mut self,
+        pat: &[u8],
+        mut max_len: usize,
+        trap: &Tr,
+        f: impl FnOnce(&[u8], &Tr) -> Result<T>,
+    ) -> Result<(Option<T>, usize)> {
+        let mut buf = self.read.fill_buf()?;
+        buf = &buf[..buf.len().min(max_len)];
+        max_len -= buf.len();
+        if let Some(p) = buf.windows(pat.len()).position(|a| a == pat) {
+            let len = pat.len() + p;
+            let res = f(&buf[..len], trap);
+            self.read.consume(len);
+            return trap.res(res).map(|a| (a, len));
+        }
+
+        self.buf.clear();
+        self.buf.extend(buf);
+
+        'outer: while max_len != 0 {
+            buf = self.read.fill_buf()?;
+            buf = &buf[..buf.len().min(max_len)];
+            max_len -= buf.len();
+
+            for i in 1..pat.len() - 1 {
+                if self.buf.ends_with(&pat[..i]) && buf.starts_with(&pat[i..])
+                {
+                    let cnt = pat.len() - i;
+                    self.buf.extend(&buf[..cnt]);
+                    self.read.consume(cnt);
+                    break 'outer;
+                }
+            }
+
+            if let Some(p) = buf.windows(pat.len()).position(|a| a == pat) {
+                let len = pat.len() + p;
+                self.buf.extend(&buf[..len]);
+                self.read.consume(len);
+                break;
+            }
+
+            self.buf.extend(buf);
+            let len = buf.len();
+            self.read.consume(len);
+        }
+
+        trap.res(f(&self.buf, trap)).map(|a| (a, self.buf.len()))
     }
 
     pub fn withc<T, const LEN: usize>(

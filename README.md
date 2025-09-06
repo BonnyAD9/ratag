@@ -8,7 +8,7 @@ Recognized file extensions:
 
 Data that can be read from all formats that support it:
 - Title, Album, Artists, Track, Track count, Year, Date, Time, Disc, Disc
-  count, Comments
+  count, Comments, Pictures
 
 Supported tag formats:
 - `ID3v1` (`ID3v1.0`, `ID3v1.1`, `ID3v1.2`)
@@ -16,17 +16,18 @@ Supported tag formats:
 - `ID3v2`
     - Only version `ID3v2.3`
     - Unsynchronization, compression and ecryption is not supported.
-    - Only frames `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`, `TIME`, `TLEN`,
-      `TPE1`, `TPOS`, `TRCK` and `TYER`
+    - Only frames `APIC`, `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`, `TIME`,
+      `TLEN`, `TPE1`, `TPOS`, `TRCK` and `TYER`
 - `flac`
     - Song length.
+    - Picture.
     - Vorbis comment can extract only `TITLE`, `ALBUM`, `TRACKNUMBER`,
       `ARTIST`, `GENRE`, `DATE`, `DISCNUMBER`, `TRACKTOTAL`, `DISCTOTAL` and
       `COMMENT`
 - `mp4`
     - Song length at `moov.mvhd`.
     - Metadata at `moov.udta.meta.ilst`: ` nam`, ` cmt`, ` day`, ` ART`,
-      ` trk`, `trkn`, ` alb`, `gnre`, `disk`
+      ` trk`, `trkn`, ` alb`, `gnre`, `disk`, `covr`
 
 Other parsers:
 - `vorbis comment`

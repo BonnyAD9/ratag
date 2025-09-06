@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use time::{Date, Time, UtcDateTime};
 
-use crate::{Comment, DataType};
+use crate::{Comment, DataType, Picture};
 
 /// Generic storage for data from tag.
 #[allow(unused_variables)]
@@ -55,6 +55,9 @@ pub trait TagStore {
 
     /// Set the comments.
     fn set_comments(&mut self, comments: Vec<Comment>) {}
+
+    /// Set the picture.
+    fn add_picture(&mut self, picture: Picture) {}
 }
 
 pub(crate) trait TagStoreExt {

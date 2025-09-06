@@ -13,6 +13,7 @@ pub struct FullBox {
 impl FullBox {
     pub const BINARY: u32 = 0;
     pub const TEXT: u32 = 1;
+    pub const IMAGE: u32 = 0xD;
 
     pub fn from_bytes(d: [u8; 4]) -> Self {
         Self {

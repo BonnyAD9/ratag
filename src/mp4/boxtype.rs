@@ -4,6 +4,8 @@ pub const ALB: u32 = u32::from_be_bytes(*b"\xa9alb");
 pub const ART: u32 = u32::from_be_bytes(*b"\xa9ART");
 /// Comment box.
 pub const CMT: u32 = u32::from_be_bytes(*b"\xa9cmt");
+/// Cover image box.
+pub const COVR: u32 = u32::from_be_bytes(*b"covr");
 /// Data box.
 pub const DATA: u32 = u32::from_be_bytes(*b"data");
 /// Date and time.
@@ -26,6 +28,7 @@ pub const MVHD: u32 = u32::from_be_bytes(*b"mvhd");
 pub const NAM: u32 = u32::from_be_bytes(*b"\xa9nam");
 /// Track number box.
 pub const TRK: u32 = u32::from_be_bytes(*b"\xa9trk");
+/// Track number box.
 pub const TRKN: u32 = u32::from_be_bytes(*b"trkn");
 /// User data box.
 pub const UDTA: u32 = u32::from_be_bytes(*b"udta");

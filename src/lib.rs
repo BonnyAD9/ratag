@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![warn(missing_docs)]
 
 mod basic_tag;
 mod bread;
@@ -11,6 +12,9 @@ pub mod flac;
 pub mod id3;
 /// Module for reading tags for mp4 files.
 pub mod mp4;
+mod picture;
+mod picture_kind;
+mod picture_tag;
 mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
@@ -27,7 +31,8 @@ use std::{
 use crate::{bread::Bread, flac::Flac, id3::Id3, mp4::Mp4, trap::*};
 
 pub use self::{
-    basic_tag::*, comment::*, data_type::*, err::*, tag_read::*, tag_store::*,
+    basic_tag::*, comment::*, data_type::*, err::*, picture::*,
+    picture_kind::*, picture_tag::*, tag_read::*, tag_store::*,
 };
 
 /// Reads from reader with the first tag format that succeeds.

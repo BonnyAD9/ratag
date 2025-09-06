@@ -16,7 +16,8 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Result, TagRead, TagStore, TagStoreExt,
+    Comment, DataType, Error, Picture, PictureKind, Result, TagRead, TagStore,
+    TagStoreExt,
     bread::Bread,
     id3::genres::get_genre,
     trap::{Trap, TrapExt},
@@ -301,6 +302,19 @@ fn read_ilst(
                     Ok(())
                 })?;
             }
+            boxtype::COVR
+                if store.stores_data(DataType::Picture(
+                    PictureKind::FRONT_COVER,
+                )) =>
+            {
+                read_annotation(r, trap, len, read_image, |d| {
+                    store.add_picture(Picture::from_data(
+                        d,
+                        PictureKind::FRONT_COVER,
+                    ));
+                    Ok(())
+                })?;
+            }
             _ => {
                 let Some(s) = *bx.size_next else {
                     break;
@@ -353,6 +367,35 @@ fn read_annotation<
     Ok(())
 }
 
+fn read_image(
+    r: &mut Bread<impl BufRead + Seek>,
+    trap: &impl Trap,
+    len: OptU64,
+    store: impl FnOnce(Vec<u8>) -> Result<()>,
+) -> Result<()> {
+    let Some(mut len) = *len else {
+        r.seek(SeekFrom::End(0))?;
+        return trap.error(Error::InvalidLength);
+    };
+
+    if len < 8 {
+        r.useek_by(len)?;
+        return trap.error(Error::InvalidLength);
+    }
+
+    let fb: FullBox = r.get()?;
+    r.seek_by(4)?;
+    len -= 8;
+
+    if fb.flags != FullBox::IMAGE {
+        r.useek_by(len)?;
+        return trap.error(Error::Unsupported("Box type flags for image."));
+    }
+
+    let data = r.read_exact_owned(len as usize)?;
+    trap.prop(store(data))
+}
+
 fn read_genre(
     r: &mut Bread<impl BufRead + Seek>,
     trap: &impl Trap,
@@ -400,7 +443,7 @@ fn read_genre(
         }
         _ => {
             r.useek_by(len)?;
-            trap.error(Error::Unsupported("Box type flags."))
+            trap.error(Error::Unsupported("Box type flags for genre."))
         }
     }
 }
@@ -426,7 +469,7 @@ fn read_num_of(
 
     if fb.flags != FullBox::BINARY {
         r.useek_by(len)?;
-        return trap.error(Error::Unsupported("Box type flags."));
+        return trap.error(Error::Unsupported("Box type flags for num of."));
     }
 
     r.seek_by(6)?;
@@ -472,7 +515,7 @@ fn read_string(
 
     if fb.flags != FullBox::TEXT {
         r.useek_by(len)?;
-        return trap.error(Error::Unsupported("Box type flags."));
+        return trap.error(Error::Unsupported("Box type flags for string."));
     }
 
     r.seek_by(4)?;

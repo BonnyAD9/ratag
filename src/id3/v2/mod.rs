@@ -17,8 +17,8 @@ use encoding::{
 };
 
 use crate::{
-    Bread, Comment, DataType, Error, Result, TagStore, Trap, TrapExt,
-    id3::get_genre,
+    Bread, Comment, DataType, Error, Picture, PictureKind, Result, TagStore,
+    Trap, TrapExt, id3::get_genre,
 };
 
 pub use self::id3v2::*;
@@ -92,6 +92,13 @@ pub fn from_read(
 
         match header.id {
             0 => break,
+            frame::APIC
+                if store.stores_data(DataType::Picture(
+                    PictureKind::all_id3(),
+                )) =>
+            {
+                read_picture(&mut r, store, trap, header.size as i64)?;
+            }
             frame::TALB if store.stores_data(DataType::Album) => {
                 if let Some(r) = r.witht(hsize, trap, read_string)? {
                     store.set_album(Some(r));
@@ -162,6 +169,78 @@ pub fn from_read(
     }
 
     store.set_comments(comments);
+
+    Ok(())
+}
+
+fn read_picture(
+    r: &mut Bread<impl BufRead + Seek>,
+    store: &mut impl TagStore,
+    trap: &impl Trap,
+    mut length: i64,
+) -> Result<()> {
+    let enc = r.next()?;
+    length -= 1;
+
+    let null = match encoding_null(enc) {
+        Ok(n) => n,
+        Err(e) => {
+            r.seek_by(length)?;
+            return trap.error(e);
+        }
+    };
+
+    if length < 0 {
+        r.seek_by(length)?;
+        return trap.error(Error::InvalidLength);
+    }
+
+    let (res, len) = r.witht_until(&[0], length as usize, trap, |s, t| {
+        read_string_enc_nonull(0, &s[..s.len() - 1], t)
+    })?;
+    length -= len as i64;
+
+    let Some(mime) = res else {
+        r.seek_by(length)?;
+        return Ok(());
+    };
+
+    let kind = if let Some(p) = PictureKind::from_id3(r.next()?) {
+        p
+    } else {
+        trap.error(Error::InvalidPictureKind)?;
+        PictureKind::default()
+    };
+    length -= 1;
+
+    if !store.stores_data(DataType::Picture(kind)) {
+        r.seek_by(length)?;
+        return Ok(());
+    }
+
+    if length < 0 {
+        r.seek_by(length)?;
+        return trap.error(Error::InvalidLength);
+    }
+
+    let (res, len) = r.witht_until(null, length as usize, trap, |s, t| {
+        read_string_enc_nonull(enc, &s[..s.len() - null.len()], t)
+    })?;
+    length -= len as i64;
+
+    let Some(description) = res else {
+        r.seek_by(length)?;
+        return Ok(());
+    };
+
+    if length < 0 {
+        r.seek_by(length)?;
+        return trap.error(Error::InvalidLength);
+    }
+
+    let data = r.read_exact_owned(length as usize)?;
+
+    store.add_picture(Picture::from_id3(mime, description, kind, data));
 
     Ok(())
 }
@@ -275,11 +354,7 @@ fn read_string_enc(
     d: &[u8],
     trap: &impl Trap,
 ) -> Result<(String, usize)> {
-    let null: &[_] = match enc {
-        0 => &[0],    // ISO-8859-1
-        1 => &[0, 0], // UTF-16
-        _ => return Err(Error::Unsupported("Unknown encoding in ID3v2.")),
-    };
+    let null = encoding_null(enc)?;
 
     let end = d.windows(null.len()).position(|a| a == null);
 
@@ -290,22 +365,35 @@ fn read_string_enc(
         d.len()
     };
 
-    let trap = trap.decoder_trap();
-    let e = |_| Error::InvalidEncoding;
-    let res = match (enc, d) {
-        (0, _) => ISO_8859_1.decode(&d[..end], trap).map_err(e)?,
-        (1, [0xfe, 0xff, ..]) => {
-            UTF_16BE.decode(&d[2..end], trap).map_err(e)?
-        }
-        (1, [0xff, 0xfe, ..]) => {
-            UTF_16LE.decode(&d[2..end], trap).map_err(e)?
-        }
-        _ => return Err(Error::InvalidEncoding),
-    };
+    let res = read_string_enc_nonull(enc, &d[..end], trap)?;
 
     if end != d.len() {
         end += null.len();
     }
 
     Ok((res, end))
+}
+
+fn read_string_enc_nonull(
+    enc: u8,
+    d: &[u8],
+    trap: &impl Trap,
+) -> Result<String> {
+    let trap = trap.decoder_trap();
+    let e = |_| Error::InvalidEncoding;
+    match (enc, d) {
+        (0, _) => Ok(ISO_8859_1.decode(d, trap).map_err(e)?),
+        (1, [0xfe, 0xff, ..]) => Ok(UTF_16BE.decode(d, trap).map_err(e)?),
+        (1, [0xff, 0xfe, ..]) => Ok(UTF_16LE.decode(d, trap).map_err(e)?),
+        _ => Err(Error::InvalidEncoding),
+    }
+}
+
+fn encoding_null(enc: u8) -> Result<&'static [u8]> {
+    let res: Result<&[_]> = match enc {
+        0 => Ok(&[0]),    // ISO-8859-1
+        1 => Ok(&[0, 0]), // UTF-16
+        _ => Err(Error::Unsupported("Unknown encoding in ID3v2.")),
+    };
+    res
 }

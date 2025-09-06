@@ -1,6 +1,11 @@
 mod metadata_block_header;
 mod streaminfo;
 
+use encoding::{
+    Encoding,
+    all::{ASCII, UTF_8},
+};
+
 use self::{metadata_block_header::*, streaminfo::*};
 
 use std::{
@@ -11,8 +16,8 @@ use std::{
 };
 
 use crate::{
-    DataType, Error, Result, TagRead, TagStore, bread::Bread, trap::Trap,
-    vorbis,
+    DataType, Error, Picture, PictureKind, Result, TagRead, TagStore,
+    bread::Bread, trap::Trap, vorbis,
 };
 
 // Implementation is based on: https://www.rfc-editor.org/rfc/rfc9639.html
@@ -74,9 +79,85 @@ pub fn from_read(
             MetadataBlockHeader::VORBISCOMMENT => {
                 vorbis::from_bread(&mut r, store, trap, false)?;
             }
-            _ => _ = r.seek_by(header.length as i64)?,
+            MetadataBlockHeader::PICTURE => {
+                read_picture(&mut r, store, trap, header.length as i64)?;
+            }
+            _ => r.seek_by(header.length as i64)?,
         }
     }
+
+    Ok(())
+}
+
+fn read_picture(
+    r: &mut Bread<impl BufRead + Seek>,
+    store: &mut impl TagStore,
+    trap: &impl Trap,
+    mut len: i64,
+) -> Result<()> {
+    let typ: u32 = r.get_be()?;
+    len -= 4;
+    let kind = if typ < u8::MAX as u32
+        && let Some(pk) = PictureKind::from_id3(typ as u8)
+    {
+        pk
+    } else {
+        trap.error(Error::InvalidPictureKind)?;
+        PictureKind::default()
+    };
+
+    if !store.stores_data(DataType::Picture(kind)) {
+        r.seek_by(len)?;
+        return Ok(());
+    }
+
+    let mut l: u32 = r.get_be()?;
+    let mime = r.witht(l as usize, trap, |d, t| {
+        ASCII
+            .decode(d, t.decoder_trap())
+            .map_err(|_| Error::InvalidEncoding)
+    })?;
+    len -= l as i64;
+
+    let is_uri = mime.as_deref() == Some("-->");
+
+    l = r.get_be()?;
+    let description = r.witht(l as usize, trap, |d, t| {
+        UTF_8
+            .decode(d, t.decoder_trap())
+            .map_err(|_| Error::InvalidEncoding)
+    })?;
+    len -= l as i64;
+
+    let width: u32 = r.get_be()?;
+    let height: u32 = r.get_be()?;
+    let color_depth: u32 = r.get_be()?;
+    len -= 12;
+
+    let palette_size: u32 = r.get_be()?;
+    let palette_size = if palette_size == 0 {
+        None
+    } else {
+        Some(palette_size)
+    };
+    len -= 4;
+
+    l = r.get_be()?;
+    let data = r.read_exact_owned(l as usize)?;
+    len -= l as i64;
+
+    store.add_picture(Picture {
+        mime,
+        description,
+        kind,
+        is_uri,
+        size: Some((width as usize, height as usize)),
+        color_depth: Some(color_depth),
+        palette_size: palette_size.map(|a| a as usize),
+        data,
+    });
+
+    r.seek_by(len)?;
 
     Ok(())
 }

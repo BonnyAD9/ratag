@@ -1,3 +1,5 @@
+/// Picture
+pub const APIC: u32 = u32::from_be_bytes(*b"APIC");
 /// Album
 pub const TALB: u32 = u32::from_be_bytes(*b"TALB");
 /// Genre
