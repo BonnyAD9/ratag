@@ -21,10 +21,6 @@ pub enum Error {
     /// Invalid picture kind.
     #[error("Invalid picture kind.")]
     InvalidPictureKind,
-    /// Invalid digit when parsing string to number. This is usually
-    /// recoverable.
-    #[error("Invalid digit in numeric string.")]
-    InvalidDigit,
     /// String is nor properly terminated. This is usually recoverable.
     #[error("String is not properly terminated.")]
     StringNotTerminated,
@@ -34,16 +30,22 @@ pub enum Error {
     /// Vorbis framing bit is not set.
     #[error("Vorbis framing bit is not set.")]
     InvalidVorbisFramingBit,
+    /// Invalid time format.
+    #[error("Invalid date format.")]
+    InvalidTime,
     /// Invalid date format.
     #[error("Invalid date format.")]
     InvalidDate,
+    /// Missing BOM.
+    #[error("Missing BOM.")]
+    MissingBom,
     /// Feature required to parse the tag is not supported.
-    #[error("Not supported: {0}.")]
+    #[error("Not supported: {0}")]
     Unsupported(&'static str),
+    /// Failed to parse number.
+    #[error(transparent)]
+    ParseInt(#[from] std::num::ParseIntError),
     /// Any IO error.
     #[error(transparent)]
     Io(#[from] std::io::Error),
-    /// Failed to parse date/time
-    #[error(transparent)]
-    DateTime(#[from] time::error::Parse),
 }

@@ -16,7 +16,7 @@ pub struct BasicTag {
     /// Track number within the album.
     pub track: Option<u32>,
     /// Year of release of the song.
-    pub year: Option<u32>,
+    pub year: Option<i32>,
     /// Disc number.
     pub disc: Option<u32>,
     /// Length of the song.
@@ -62,7 +62,7 @@ impl TagStore for BasicTag {
         self.track = track;
     }
 
-    fn set_year(&mut self, year: Option<u32>) {
+    fn set_year(&mut self, year: Option<i32>) {
         self.year = year;
     }
 

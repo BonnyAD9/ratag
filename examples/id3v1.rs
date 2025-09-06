@@ -14,8 +14,8 @@ fn main() -> ExitCode {
 
 fn start() -> Result<()> {
     let tag = Id3v1Tag::from_file(
-        "/home/kubas/music/4tet - 1st - 01 Addams Family Theme.mp3",
-        &trap::Skip,
+        "/home/kubas/music/Bastille - Goosebumps EP - 03 WHAT YOU GONNA DO (feat. Graham Coxon).mp3",
+        &trap::Warn,
     )?;
     println!("{tag:#?}");
     Ok(())

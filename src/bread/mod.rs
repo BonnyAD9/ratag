@@ -98,7 +98,7 @@ impl<R: BufRead> Bread<R> {
         trap.res(res)
     }
 
-    pub fn witht_until<T, Tr: Trap>(
+    pub fn witht_until_chunk<T, Tr: Trap>(
         &mut self,
         pat: &[u8],
         mut max_len: usize,
@@ -108,7 +108,8 @@ impl<R: BufRead> Bread<R> {
         let mut buf = self.read.fill_buf()?;
         buf = &buf[..buf.len().min(max_len)];
         max_len -= buf.len();
-        if let Some(p) = buf.windows(pat.len()).position(|a| a == pat) {
+        if let Some(mut p) = buf.chunks(pat.len()).position(|a| a == pat) {
+            p *= pat.len();
             let len = pat.len() + p;
             let res = f(&buf[..len], trap);
             self.read.consume(len);
@@ -118,20 +119,23 @@ impl<R: BufRead> Bread<R> {
         self.buf.clear();
         self.buf.extend(buf);
 
-        'outer: while max_len != 0 {
+        while max_len != 0 {
             buf = self.read.fill_buf()?;
             buf = &buf[..buf.len().min(max_len)];
-            max_len -= buf.len();
 
-            for i in 1..pat.len() - 1 {
-                if self.buf.ends_with(&pat[..i]) && buf.starts_with(&pat[i..])
-                {
-                    let cnt = pat.len() - i;
-                    self.buf.extend(&buf[..cnt]);
-                    self.read.consume(cnt);
-                    break 'outer;
+            let m = buf.len() % pat.len();
+            if m != 0 {
+                let cnt = pat.len() - m;
+                self.buf.extend(&buf[..cnt]);
+                self.read.consume(cnt);
+                max_len -= cnt;
+                if self.buf.ends_with(&pat[..m]) {
+                    break;
                 }
+                buf = self.read.fill_buf()?;
             }
+
+            max_len -= buf.len();
 
             if let Some(p) = buf.windows(pat.len()).position(|a| a == pat) {
                 let len = pat.len() + p;

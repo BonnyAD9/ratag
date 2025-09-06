@@ -6,19 +6,17 @@ mod id3v2;
 use std::{
     fs::File,
     io::{BufRead, BufReader, Seek},
+    num::ParseIntError,
     path::Path,
     str::FromStr,
     time::Duration,
 };
 
-use encoding::{
-    Encoding,
-    all::{ASCII, ISO_8859_1, UTF_16BE, UTF_16LE},
-};
-
 use crate::{
     Bread, Comment, DataType, Error, Picture, PictureKind, Result, TagStore,
-    Trap, TrapExt, id3::get_genre,
+    TagStoreExt, Trap, TrapExt,
+    id3::get_genre,
+    parsers::{self, DateTime},
 };
 
 pub use self::id3v2::*;
@@ -75,12 +73,11 @@ pub fn from_read(
 
     let mut comments = vec![];
 
-    while !store.done() && pos < header.size {
+    while !store.done() && pos + 10 < header.size {
         let mut header: FrameHeader = r.get()?;
         pos += header.size + 10;
         if header.compression() || header.encryption() {
             r.seek_by(header.size as i64)?;
-            pos += header.size;
             continue;
         }
         if header.grouping() {
@@ -110,8 +107,8 @@ pub fn from_read(
                 }
             }
             frame::TDAT if store.stores_data(DataType::Date) => {
-                if let Some(d) = r.witht(hsize, trap, read_date_time)? {
-                    store.set_date(Some(d));
+                if let Some(d) = r.witht(hsize, trap, read_date)? {
+                    store.set_date_time(d);
                 }
             }
             frame::TIT2 if store.stores_data(DataType::Title) => {
@@ -120,9 +117,7 @@ pub fn from_read(
                 }
             }
             frame::TIME if store.stores_data(DataType::Time) => {
-                if let Some((h, m)) = r.witht(hsize, trap, read_date_time)? {
-                    let t =
-                        Duration::from_secs(h as u64 * 3600 + m as u64 * 60);
+                if let Some(t) = r.witht(hsize, trap, read_time)? {
                     store.set_time(Some(t));
                 }
             }
@@ -155,8 +150,8 @@ pub fn from_read(
                 }
             }
             frame::TYER if store.stores_data(DataType::Year) => {
-                if let Some(a) = r.witht(hsize, trap, read_number)? {
-                    store.set_year(Some(a));
+                if let Some(d) = r.witht(hsize, trap, read_year)? {
+                    store.set_date_time(d);
                 }
             }
             frame::COMM if store.stores_data(DataType::Comments) => {
@@ -195,9 +190,10 @@ fn read_picture(
         return trap.error(Error::InvalidLength);
     }
 
-    let (res, len) = r.witht_until(&[0], length as usize, trap, |s, t| {
-        read_string_enc_nonull(0, &s[..s.len() - 1], t)
-    })?;
+    let (res, len) =
+        r.witht_until_chunk(&[0], length as usize, trap, |s, t| {
+            read_string_enc_nonull(0, &s[..s.len() - 1], t)
+        })?;
     length -= len as i64;
 
     let Some(mime) = res else {
@@ -223,9 +219,10 @@ fn read_picture(
         return trap.error(Error::InvalidLength);
     }
 
-    let (res, len) = r.witht_until(null, length as usize, trap, |s, t| {
-        read_string_enc_nonull(enc, &s[..s.len() - null.len()], t)
-    })?;
+    let (res, len) =
+        r.witht_until_chunk(null, length as usize, trap, |s, t| {
+            read_string_enc_nonull(enc, &s[..s.len() - null.len()], t)
+        })?;
     length -= len as i64;
 
     let Some(description) = res else {
@@ -247,15 +244,11 @@ fn read_picture(
 
 fn read_comment(mut data: &[u8], trap: &impl Trap) -> Result<Comment> {
     let enc = data[0];
-    let language = trap.res(
-        ASCII
-            .decode(&data[1..4], trap.decoder_trap())
-            .map_err(|_| Error::InvalidEncoding),
-    )?;
+    let language = trap.res(parsers::ascii(&data[1..4], trap))?;
 
     data = &data[4..];
-    let (desc, len) = read_string_enc(enc, data, trap)?;
-    let (value, _) = read_string_enc(enc, &data[len..], trap)?;
+    let (len, desc) = read_string_enc(enc, data, trap)?;
+    let (_, value) = read_string_enc(enc, &data[len..], trap)?;
 
     Ok(Comment {
         language,
@@ -264,28 +257,19 @@ fn read_comment(mut data: &[u8], trap: &impl Trap) -> Result<Comment> {
     })
 }
 
-fn read_date_time(data: &[u8], trap: &impl Trap) -> Result<(u32, u32)> {
+fn read_time(data: &[u8], trap: &impl Trap) -> Result<Duration> {
     let s = read_string(data, trap)?;
-    if s.len() != 4 {
-        return Err(Error::InvalidDate);
-    }
+    parsers::time_only(&s)
+}
 
-    let d = s[..2].parse().map_err(|_| Error::InvalidDigit)?;
-    let m = s[2..].parse().map_err(|_| Error::InvalidDigit)?;
-
-    Ok((m, d))
+fn read_date(data: &[u8], trap: &impl Trap) -> Result<DateTime> {
+    let s = read_string(data, trap)?;
+    parsers::date(&s, trap)
 }
 
 fn read_position(data: &[u8], trap: &impl Trap) -> Result<(u32, Option<u32>)> {
     let s = read_string(data, trap)?;
-    if let Some((t, o)) = s.split_once('/') {
-        let t = t.parse().map_err(|_| Error::InvalidDigit)?;
-        let o = trap.res(o.parse().map_err(|_| Error::InvalidDigit))?;
-        Ok((t, o))
-    } else {
-        let t = s.parse().map_err(|_| Error::InvalidDigit)?;
-        Ok((t, None))
-    }
+    parsers::num_of(&s, trap)
 }
 
 fn read_string_list(data: &[u8], trap: &impl Trap) -> Result<Vec<String>> {
@@ -297,10 +281,16 @@ fn read_length(data: &[u8], trap: &impl Trap) -> Result<Duration> {
     Ok(Duration::from_millis(read_number(data, trap)?))
 }
 
-fn read_number<T: FromStr>(data: &[u8], trap: &impl Trap) -> Result<T> {
-    read_string(data, trap)?
-        .parse()
-        .map_err(|_| Error::InvalidDigit)
+fn read_number<T: FromStr<Err = ParseIntError>>(
+    data: &[u8],
+    trap: &impl Trap,
+) -> Result<T> {
+    parsers::num(&read_string(data, trap)?)
+}
+
+fn read_year(data: &[u8], trap: &impl Trap) -> Result<DateTime> {
+    let year = read_string(data, trap)?;
+    parsers::year(&year, trap)
 }
 
 fn read_genres(data: &[u8], trap: &impl Trap) -> Result<Vec<String>> {
@@ -346,32 +336,19 @@ fn read_string(data: &[u8], trap: &impl Trap) -> Result<String> {
         return Err(Error::InvalidLength);
     }
 
-    read_string_enc(data[0], &data[1..], trap).map(|(s, _)| s)
+    read_string_enc(data[0], &data[1..], trap).map(|(_, s)| s)
 }
 
 fn read_string_enc(
     enc: u8,
     d: &[u8],
     trap: &impl Trap,
-) -> Result<(String, usize)> {
-    let null = encoding_null(enc)?;
-
-    let end = d.windows(null.len()).position(|a| a == null);
-
-    let mut end = if let Some(end) = end {
-        end
-    } else {
-        trap.error(Error::StringNotTerminated)?;
-        d.len()
-    };
-
-    let res = read_string_enc_nonull(enc, &d[..end], trap)?;
-
-    if end != d.len() {
-        end += null.len();
+) -> Result<(usize, String)> {
+    match enc {
+        0 => parsers::iso_8859_1_nt(d, trap),
+        1 => parsers::utf_16_bom_nt(d, trap),
+        _ => Err(Error::InvalidEncoding),
     }
-
-    Ok((res, end))
 }
 
 fn read_string_enc_nonull(
@@ -379,12 +356,9 @@ fn read_string_enc_nonull(
     d: &[u8],
     trap: &impl Trap,
 ) -> Result<String> {
-    let trap = trap.decoder_trap();
-    let e = |_| Error::InvalidEncoding;
-    match (enc, d) {
-        (0, _) => Ok(ISO_8859_1.decode(d, trap).map_err(e)?),
-        (1, [0xfe, 0xff, ..]) => Ok(UTF_16BE.decode(d, trap).map_err(e)?),
-        (1, [0xff, 0xfe, ..]) => Ok(UTF_16LE.decode(d, trap).map_err(e)?),
+    match enc {
+        0 => parsers::iso_8859_1(d, trap),
+        1 => parsers::utf_16_bom(d, trap),
         _ => Err(Error::InvalidEncoding),
     }
 }

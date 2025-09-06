@@ -62,7 +62,9 @@ pub fn from_read(
     trap: &impl Trap,
 ) -> Result<()> {
     let mut r = Bread::new(r);
-    r.expect(b"fLaC").map_err(|_| Error::NoTag)?;
+    if !r.expect(b"fLaC")? {
+        return Err(Error::NoTag);
+    }
 
     let mut next = true;
     while next && !store.done() {
@@ -112,6 +114,7 @@ fn read_picture(
     }
 
     let mut l: u32 = r.get_be()?;
+    len -= 4;
     let mime = r.witht(l as usize, trap, |d, t| {
         ASCII
             .decode(d, t.decoder_trap())
@@ -122,6 +125,7 @@ fn read_picture(
     let is_uri = mime.as_deref() == Some("-->");
 
     l = r.get_be()?;
+    len -= 4;
     let description = r.witht(l as usize, trap, |d, t| {
         UTF_8
             .decode(d, t.decoder_trap())
@@ -143,6 +147,7 @@ fn read_picture(
     len -= 4;
 
     l = r.get_be()?;
+    len -= 4;
     let data = r.read_exact_owned(l as usize)?;
     len -= l as i64;
 

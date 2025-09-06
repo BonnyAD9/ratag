@@ -12,6 +12,7 @@ pub mod flac;
 pub mod id3;
 /// Module for reading tags for mp4 files.
 pub mod mp4;
+mod parsers;
 mod picture;
 mod picture_kind;
 mod picture_tag;

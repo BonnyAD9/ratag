@@ -3,9 +3,6 @@ mod full_box;
 mod mp4_box;
 mod opt_u64;
 
-use encoding::{Encoding, all::UTF_8};
-use time::{UtcDateTime, format_description::well_known};
-
 use self::{full_box::*, mp4_box::*, opt_u64::*};
 
 use std::{
@@ -20,6 +17,7 @@ use crate::{
     TagStoreExt,
     bread::Bread,
     id3::genres::get_genre,
+    parsers::{self, DateTime},
     trap::{Trap, TrapExt},
 };
 
@@ -432,11 +430,9 @@ fn read_genre(
             trap.prop(store(g.to_string()))
         }
         FullBox::TEXT => {
-            if let Some(g) = r.witht(len as usize, trap, |d, t| {
-                UTF_8
-                    .decode(d, t.decoder_trap())
-                    .map_err(|_| Error::InvalidEncoding)
-            })? {
+            if let Some(g) =
+                r.witht(len as usize, trap, |d, t| parsers::utf_8(d, t))?
+            {
                 return trap.prop(store(g));
             }
             Ok(())
@@ -487,11 +483,9 @@ fn read_day(
     r: &mut Bread<impl BufRead + Seek>,
     trap: &impl Trap,
     len: OptU64,
-    store: impl FnOnce(UtcDateTime) -> Result<()>,
+    store: impl FnOnce(DateTime) -> Result<()>,
 ) -> Result<()> {
-    read_string(r, trap, len, |s| {
-        store(UtcDateTime::parse(&s, &well_known::Iso8601::PARSING)?)
-    })
+    read_string(r, trap, len, |s| store(parsers::year(&s, trap)?))
 }
 
 fn read_string(
@@ -521,11 +515,9 @@ fn read_string(
     r.seek_by(4)?;
     len -= 4;
 
-    if let Some(s) = r.witht(len as usize, trap, |d, t| {
-        UTF_8
-            .decode(d, t.decoder_trap())
-            .map_err(|_| Error::InvalidEncoding)
-    })? {
+    if let Some(s) =
+        r.witht(len as usize, trap, |d, t| parsers::utf_8(d, t))?
+    {
         store(s)
     } else {
         Ok(())

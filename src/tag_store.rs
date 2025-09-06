@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-use time::{Date, Time, UtcDateTime};
-
-use crate::{Comment, DataType, Picture};
+use crate::{Comment, DataType, Picture, parsers::DateTime};
 
 /// Generic storage for data from tag.
 #[allow(unused_variables)]
@@ -36,10 +34,10 @@ pub trait TagStore {
 
     /// Set year of release of the song. Note that in some cases `set_date` is
     /// called but `set_year` not.
-    fn set_year(&mut self, year: Option<u32>) {}
+    fn set_year(&mut self, year: Option<i32>) {}
 
     /// Set the date of release of the song.
-    fn set_date(&mut self, month_day: Option<(u32, u32)>) {}
+    fn set_date(&mut self, month_day: Option<(u8, u8)>) {}
 
     /// Set the time of release.
     fn set_time(&mut self, time: Option<Duration>) {}
@@ -61,25 +59,21 @@ pub trait TagStore {
 }
 
 pub(crate) trait TagStoreExt {
-    fn set_date2(&mut self, date: Date);
-
-    fn set_date_time(&mut self, dt: UtcDateTime);
+    fn set_date_time(&mut self, dt: DateTime);
 }
 
 impl<T: TagStore> TagStoreExt for T {
-    fn set_date2(&mut self, date: Date) {
-        self.set_year(Some(date.year() as u32));
+    fn set_date_time(&mut self, dt: DateTime) {
+        if let Some(y) = dt.year {
+            self.set_year(Some(y));
+        }
 
-        let month = u8::from(date.month()) as u32;
-        let day = date.day() as u32;
-        self.set_date((month != 1 || day != 0).then_some((month, day)));
-    }
+        if let Some(d) = dt.date {
+            self.set_date(Some(d));
+        }
 
-    fn set_date_time(&mut self, dt: UtcDateTime) {
-        self.set_date2(dt.date());
-
-        let time = dt.time().duration_since(Time::from_hms(0, 0, 0).unwrap());
-        let time = Duration::from_secs_f64(time.as_seconds_f64());
-        self.set_time((time != Duration::ZERO).then_some(time));
+        if let Some(t) = dt.time {
+            self.set_time(Some(t));
+        }
     }
 }

@@ -15,9 +15,9 @@ fn main() -> ExitCode {
 fn start() -> Result<()> {
     let mut tag = BasicTag::default();
     id3::v2::from_file(
-        "/home/kubas/music/4tet - 1st - 01 Addams Family Theme.mp3",
+        "/home/kubas/music/Imagine Dragons - Night Visions (Expanded) (CD 1) - 10 Underdog.mp3",
         &mut tag,
-        &trap::Skip,
+        &trap::Warn,
     )?;
     println!("{tag:#?}");
     Ok(())

@@ -4,10 +4,9 @@ use std::{
     path::Path,
 };
 
-use encoding::{Encoding, all::ISO_8859_1};
-
 use crate::{
-    Comment, Error, Result, TagStore, id3::genres::get_genre, trap::Trap,
+    Comment, Error, Result, TagStore, id3::genres::get_genre, parsers,
+    trap::Trap,
 };
 
 /// Data stored in ID3v1 tag.
@@ -78,19 +77,12 @@ impl Id3v1Tag {
             return Err(Error::NoTag);
         }
 
-        fn decode(data: &[u8], trap: &impl Trap) -> String {
-            let end = data.iter().position(|c| *c == 0).unwrap_or(data.len());
-            ISO_8859_1
-                .decode(&data[..end], trap.decoder_trap())
-                .unwrap()
-        }
-
         // id3v1.0
-        let title = decode(&v11[3..33], trap);
-        let artist = decode(&v11[33..63], trap);
-        let album = decode(&v11[63..93], trap);
+        let title = parsers::iso_8859_1_mnt(&v11[3..33], trap)?.1;
+        let artist = parsers::iso_8859_1_mnt(&v11[33..63], trap)?.1;
+        let album = parsers::iso_8859_1_mnt(&v11[63..93], trap)?.1;
         let year = parse_year(v11[93..97].try_into().unwrap());
-        let comment = decode(&v11[97..127], trap);
+        let comment = parsers::iso_8859_1_mnt(&v11[97..127], trap)?.1;
         let genre = v11[127];
 
         // id3v1.1
@@ -115,17 +107,12 @@ impl Id3v1Tag {
             return Ok(res);
         };
 
-        fn decode_to(out: &mut String, data: &[u8], trap: &impl Trap) {
-            let end = data.iter().position(|c| *c == 0).unwrap_or(data.len());
-            _ = ISO_8859_1.decode_to(&data[..end], trap.decoder_trap(), out);
-        }
-
         // id3v1.2
-        decode_to(&mut res.title, &v12[3..33], trap);
-        decode_to(&mut res.artist, &v12[33..63], trap);
-        decode_to(&mut res.album, &v12[63..93], trap);
-        decode_to(&mut res.comment, &v12[93..108], trap);
-        res.sub_genre = Some(decode(&v12[107..128], trap));
+        parsers::iso_8859_1_mnt_to(&mut res.title, &v12[3..33], trap)?;
+        parsers::iso_8859_1_mnt_to(&mut res.artist, &v12[33..63], trap)?;
+        parsers::iso_8859_1_mnt_to(&mut res.album, &v12[63..93], trap)?;
+        parsers::iso_8859_1_mnt_to(&mut res.comment, &v12[93..108], trap)?;
+        res.sub_genre = Some(parsers::iso_8859_1_mnt(&v12[107..128], trap)?.1);
 
         Ok(res)
     }
@@ -146,7 +133,7 @@ impl Id3v1Tag {
             store.set_album(Some(self.album));
         }
         if let Some(y) = self.year {
-            store.set_year(Some(y as u32));
+            store.set_year(Some(y as i32));
         }
         if !self.comment.is_empty() {
             store.set_comments(vec![Comment::from_value(self.comment)]);
@@ -155,7 +142,7 @@ impl Id3v1Tag {
         let mut genres = vec![];
         if let Some(g) = get_genre(self.genre) {
             genres.push(g.to_string());
-        } else {
+        } else if self.genre != 255 {
             trap.error(Error::InvalidGenreRef)?;
         }
         genres.extend(self.sub_genre);

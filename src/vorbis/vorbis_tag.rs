@@ -1,12 +1,7 @@
-use std::{collections::HashMap, io::BufRead, str::FromStr};
-
-use encoding::{Encoding, all::UTF_8};
-use time::{Date, format_description::well_known};
+use std::{collections::HashMap, io::BufRead};
 
 use crate::{
-    Comment, DataType, Error, Result, TagStore, TagStoreExt,
-    bread::Bread,
-    trap::{Trap, TrapExt},
+    bread::Bread, parsers::{self, DateTime}, trap::{Trap, TrapExt}, Comment, DataType, Error, Result, TagStore, TagStoreExt
 };
 
 /// Tag storing vorbis comments.
@@ -33,14 +28,14 @@ impl VorbisTag {
     ) -> Result<Self> {
         let vendor_len: u32 = r.get_le()?;
         let vendor = r
-            .witht(vendor_len as usize, trap, read_string)?
+            .witht(vendor_len as usize, trap, parsers::utf_8)?
             .unwrap_or_default();
 
         let comment_cnt: u32 = r.get_le()?;
         let mut comments: HashMap<_, Vec<_>> = HashMap::new();
         for _ in 0..comment_cnt {
             let len: u32 = r.get_le()?;
-            let Some(comment) = r.witht(len as usize, trap, read_string)?
+            let Some(comment) = r.witht(len as usize, trap, parsers::utf_8)?
             else {
                 continue;
             };
@@ -85,8 +80,13 @@ impl VorbisTag {
                 "TITLE" => store.set_title(Some(last(v))),
                 "ALBUM" => store.set_album(Some(last(v))),
                 "TRACKNUMBER" if store.stores_data(DataType::Track) => {
-                    if let Some(v) = trap.res(parse_num(&last(v)))? {
-                        store.set_track(Some(v));
+                    if let Some((t, c)) =
+                        trap.res(parsers::num_of(&last(v), trap))?
+                    {
+                        store.set_track(Some(t));
+                        if let Some(c) = c {
+                            store.set_track_count(Some(c));
+                        }
                     }
                 }
                 "ARTIST" if store.stores_data(DataType::Artists) => {
@@ -103,22 +103,29 @@ impl VorbisTag {
                     if store.stores_data(DataType::Year)
                         || store.stores_data(DataType::Date) =>
                 {
-                    if let Some(d) = trap.res(parse_date(&first(v)))? {
-                        store.set_date2(d);
+                    if let Some(d) =
+                        trap.res(parse_date(&first(v), trap))?
+                    {
+                        store.set_date_time(d);
                     }
                 }
                 "DISCNUMBER" if store.stores_data(DataType::Disc) => {
-                    if let Some(v) = trap.res(parse_num(&last(v)))? {
-                        store.set_disc(Some(v));
+                    if let Some((d, c)) =
+                        trap.res(parsers::num_of(&last(v), trap))?
+                    {
+                        store.set_disc(Some(d));
+                        if let Some(c) = c {
+                            store.set_disc_count(Some(c));
+                        }
                     }
                 }
                 "TRACKTOTAL" if store.stores_data(DataType::TrackCount) => {
-                    if let Some(v) = trap.res(parse_num(&last(v)))? {
+                    if let Some(v) = trap.res(parsers::num(&last(v)))? {
                         store.set_track_count(Some(v));
                     }
                 }
                 "DISCTOTAL" if store.stores_data(DataType::DiscCount) => {
-                    if let Some(v) = trap.res(parse_num(&last(v)))? {
+                    if let Some(v) = trap.res(parsers::num(&last(v)))? {
                         store.set_disc_count(Some(v));
                     }
                 }
@@ -135,18 +142,6 @@ impl VorbisTag {
     }
 }
 
-fn parse_num<T: FromStr>(s: &str) -> Result<T> {
-    s.parse().map_err(|_| Error::InvalidDigit)
-}
-
-fn parse_date(date: &str) -> Result<Date> {
-    let date = date.split_once(' ').map(|(d, _)| d).unwrap_or(date);
-
-    Ok(Date::parse(date, &well_known::Iso8601::PARSING)?)
-}
-
-fn read_string(data: &[u8], trap: &impl Trap) -> Result<String> {
-    UTF_8
-        .decode(data, trap.decoder_trap())
-        .map_err(|_| Error::InvalidEncoding)
+fn parse_date(s: &str, trap: &impl Trap) -> Result<DateTime> {
+    parsers::year(&s[..s.find(' ').unwrap_or(s.len())], trap)
 }
