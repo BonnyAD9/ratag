@@ -1,4 +1,4 @@
-use ratag::{flac, trap, BasicTag, Result};
+use ratag::{BasicTag, Result, flac, trap};
 
 fn main() -> Result<()> {
     let mut tag = BasicTag::default();

@@ -1,7 +1,10 @@
 use std::{collections::HashMap, io::BufRead};
 
 use crate::{
-    bread::Bread, parsers::{self, DateTime}, trap::{Trap, TrapExt}, Comment, DataType, Error, Result, TagStore, TagStoreExt
+    Comment, DataType, Error, Result, TagStore, TagStoreExt,
+    bread::Bread,
+    parsers::{self, DateTime},
+    trap::{Trap, TrapExt},
 };
 
 /// Tag storing vorbis comments.
@@ -103,9 +106,7 @@ impl VorbisTag {
                     if store.stores_data(DataType::Year)
                         || store.stores_data(DataType::Date) =>
                 {
-                    if let Some(d) =
-                        trap.res(parse_date(&first(v), trap))?
-                    {
+                    if let Some(d) = trap.res(parse_date(&first(v), trap))? {
                         store.set_date_time(d);
                     }
                 }
