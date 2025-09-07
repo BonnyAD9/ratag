@@ -19,6 +19,6 @@ fn start() -> Result<()> {
         &mut tag,
         &trap::Warn,
     )?;
-    //println!("{tag:#?}");
+    println!("{tag:#?}");
     Ok(())
 }

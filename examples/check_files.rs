@@ -14,10 +14,8 @@ struct TrackTrap(Rc<Cell<bool>>);
 
 impl Trap for TrackTrap {
     fn error(&self, err: Error) -> Result<()> {
-        if !matches!(err, Error::StringNotTerminated | Error::MissingBom) {
-            self.0.set(true);
-            eprintln!("warning: {err}");
-        }
+        self.0.set(true);
+        eprintln!("warning: {err}");
         Ok(())
     }
 
