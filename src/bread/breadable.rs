@@ -8,12 +8,12 @@ pub trait Breadable<R>: Sized {
 
 impl<R: BufRead, const LEN: usize> Breadable<R> for [u8; LEN] {
     fn from_bread(bread: &mut Bread<R>) -> Result<Self> {
-        bread.withc(|a| Ok(*a))
+        bread.withc(|a| *a)
     }
 }
 
 impl<R: BufRead> Breadable<R> for u8 {
     fn from_bread(bread: &mut Bread<R>) -> Result<Self> {
-        bread.withc::<_, 1>(|a| Ok(a[0]))
+        bread.withc::<_, 1>(|a| a[0])
     }
 }

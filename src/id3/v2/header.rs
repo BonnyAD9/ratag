@@ -1,12 +1,14 @@
 use std::io::BufRead;
 
 use crate::{
-    Error, Result,
+    Result,
     bread::{Bread, Breadable},
+    parsers,
 };
 
 pub struct Header {
-    pub version: u16,
+    pub major_version: u8,
+    pub _minor_version: u8,
     flags: u8,
     pub size: u32,
 }
@@ -15,7 +17,17 @@ impl Header {
     const UNSYNCHRONIZATION: u8 = 0x80;
     const EXTENDED_HEADER: u8 = 0x40;
     const _EXPERIMENTAL_INDICATOR: u8 = 0x20;
-    pub const VERSION3: u16 = 0x0300;
+    pub const MAJOR_VERSION3: u8 = 0x03;
+    pub const MAJOR_VERSION4: u8 = 0x04;
+
+    pub fn from_bytes(d: &[u8; 7]) -> Self {
+        Self {
+            major_version: d[0],
+            _minor_version: d[1],
+            flags: d[3],
+            size: parsers::syncsafe_be_u32(d[3..].try_into().unwrap()),
+        }
+    }
 
     pub fn unsynchronization(&self) -> bool {
         self.get_flag(Self::UNSYNCHRONIZATION)
@@ -36,23 +48,6 @@ impl Header {
 
 impl<R: BufRead> Breadable<R> for Header {
     fn from_bread(bread: &mut Bread<R>) -> Result<Self> {
-        if !bread.expect(b"ID3")? {
-            return Err(Error::NoTag);
-        }
-
-        let version = bread.get_be()?;
-        let flags = bread.get()?;
-        let size = bread.withc::<_, 4>(|d| {
-            Ok((d[0] as u32) << 21
-                | (d[1] as u32) << 14
-                | (d[2] as u32) << 7
-                | d[3] as u32)
-        })?;
-
-        Ok(Self {
-            version,
-            flags,
-            size,
-        })
+        bread.withc(Self::from_bytes)
     }
 }

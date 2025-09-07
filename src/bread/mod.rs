@@ -154,15 +154,15 @@ impl<R: BufRead> Bread<R> {
 
     pub fn withc<T, const LEN: usize>(
         &mut self,
-        f: impl FnOnce(&[u8; LEN]) -> Result<T>,
+        f: impl FnOnce(&[u8; LEN]) -> T,
     ) -> Result<T> {
         let buf = self.read.fill_buf()?;
         if buf.len() < LEN {
-            return f(self.arr()?);
+            return Ok(f(self.arr()?));
         }
         let res = f(buf[..LEN].try_into().unwrap());
         self.read.consume(LEN);
-        res
+        Ok(res)
     }
 
     pub fn expect(&mut self, mut b: &[u8]) -> Result<bool> {

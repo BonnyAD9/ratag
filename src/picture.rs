@@ -28,13 +28,14 @@ impl Picture {
         description: String,
         kind: PictureKind,
         data: Vec<u8>,
+        is_uri: bool,
     ) -> Self {
         Self {
             mime: Some(mime),
             description: Some(description),
             data,
             kind,
-            is_uri: false,
+            is_uri,
             size: None,
             color_depth: None,
             palette_size: None,

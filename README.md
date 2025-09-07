@@ -14,10 +14,14 @@ Supported tag formats:
 - `ID3v1` (`ID3v1.0`, `ID3v1.1`, `ID3v1.2`)
     - Fully supported.
 - `ID3v2`
-    - Only version `ID3v2.3`
+    - Only versions `ID3v2.3` and `ID3v2.4`
     - Unsynchronization, compression and ecryption is not supported.
-    - Only frames `APIC`, `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`, `TIME`,
-      `TLEN`, `TPE1`, `TPOS`, `TRCK` and `TYER`
+    - ID3v2.4 updates are not supported.
+    - ID3v2.4 appended frames are not supported.
+    - ID3v2.3 only frames `APIC`, `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`,
+      `TIME`, `TLEN`, `TPE1`, `TPOS`, `TRCK` and `TYER`.
+    - ID3v2.4 only frames `TIT2`, `TALB`, `TRCK`, `TPOS`, `TPE1`, `TLEN`,
+      `TCON`, `TDRL`, `COMM` and `APIC`.
 - `flac`
     - Song length.
     - Picture.

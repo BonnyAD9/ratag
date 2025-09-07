@@ -15,16 +15,16 @@ impl FullBox {
     pub const TEXT: u32 = 1;
     pub const IMAGE: u32 = 0xD;
 
-    pub fn from_bytes(d: [u8; 4]) -> Self {
+    pub fn from_bytes(d: &[u8; 4]) -> Self {
         Self {
             version: d[0],
-            flags: u32::from_be_bytes(d) & 0xFF_FFFF,
+            flags: u32::from_be_bytes(*d) & 0xFF_FFFF,
         }
     }
 }
 
 impl<R: BufRead> Breadable<R> for FullBox {
     fn from_bread(bread: &mut Bread<R>) -> Result<Self> {
-        bread.withc(|a| Ok(Self::from_bytes(*a)))
+        bread.withc(Self::from_bytes)
     }
 }

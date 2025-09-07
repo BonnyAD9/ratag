@@ -15,10 +15,10 @@ fn main() -> ExitCode {
 fn start() -> Result<()> {
     let mut tag = BasicTag::default();
     id3::v2::from_file(
-        "/home/kubas/music/Imagine Dragons - Night Visions (Expanded) (CD 1) - 10 Underdog.mp3",
+        "/home/kubas/music/Avicii - Taste The Feeling (Avicii Vs. Conrad Sewell).mp3",
         &mut tag,
         &trap::Warn,
     )?;
-    println!("{tag:#?}");
+    //println!("{tag:#?}");
     Ok(())
 }

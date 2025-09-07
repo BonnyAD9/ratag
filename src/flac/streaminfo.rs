@@ -36,6 +36,6 @@ impl Streaminfo {
 
 impl<R: BufRead> Breadable<R> for Streaminfo {
     fn from_bread(bread: &mut Bread<R>) -> Result<Self> {
-        bread.withc(|a| Ok(Self::from_bytes(a)))
+        bread.withc(Self::from_bytes)
     }
 }

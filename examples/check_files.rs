@@ -83,13 +83,15 @@ fn try_file(p: impl AsRef<Path>) {
     //eprintln!("FILE: {}", p.as_ref().display());
 
     if let Err(e) = read_tag_from_file(p.as_ref(), &mut store, &trap) {
+        //if !matches!(e, Error::Unsupported(_)) {
         trap.0.set(true);
         println!("error: {e}");
-    }
-
-    if store.length.is_none() && store.title.is_none() {
-        trap.0.set(true);
-        println!("info: no length and title set.");
+        //}
+    } else {
+        if store.length.is_none() && store.title.is_none() {
+            trap.0.set(true);
+            println!("info: no length and title set.");
+        }
     }
 
     if trap.0.get() {

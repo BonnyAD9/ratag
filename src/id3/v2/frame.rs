@@ -6,6 +6,8 @@ pub const TALB: u32 = u32::from_be_bytes(*b"TALB");
 pub const TCON: u32 = u32::from_be_bytes(*b"TCON");
 /// Date
 pub const TDAT: u32 = u32::from_be_bytes(*b"TDAT");
+/// Release time.
+pub const TDRL: u32 = u32::from_be_bytes(*b"TDRL");
 /// Title
 pub const TIT2: u32 = u32::from_be_bytes(*b"TIT2");
 /// Time
