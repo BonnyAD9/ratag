@@ -18,6 +18,8 @@ use crate::{
     trap::{Trap, TrapExt},
 };
 
+// Implementation is based on: https://id3.org/id3v2-00.
+
 pub fn from_bread(
     mut r: Bread<impl BufRead + Seek>,
     store: &mut impl TagStore,
