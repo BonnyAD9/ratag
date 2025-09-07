@@ -3,7 +3,16 @@ Rust Audio TAG library.
 
 Library for reading metadata from audio files.
 
-Data that can be read from all formats that support it:
+Unlike other more specialized libraries, this library doesn't prioritize
+support for everything the tagging formats have to offer but it prioritizes to
+supporting the basic metadata in as formats as possible. In short it won't read
+everyting from the file, but it aims to read the essentials from every file.
+
+On the other it is made in a extensible way, so if you would like to create
+your own reader for some specific tag format, it is simple to integrate it
+alongside with the readers supported in this library.
+
+Data that this library aims to be capable of reading:
 - Title, Album, Artists, Track, Track count, Year, Date, Time, Disc, Disc
   count, Comments, Pictures
 
