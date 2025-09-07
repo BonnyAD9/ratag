@@ -24,15 +24,15 @@ pub struct Picture {
 impl Picture {
     /// Create image from id3 data.
     pub fn from_id3(
-        mime: String,
-        description: String,
+        mime: Option<String>,
+        description: Option<String>,
         kind: PictureKind,
         data: Vec<u8>,
         is_uri: bool,
     ) -> Self {
         Self {
-            mime: Some(mime),
-            description: Some(description),
+            mime,
+            description,
             data,
             kind,
             is_uri,

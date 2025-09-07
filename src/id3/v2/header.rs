@@ -15,8 +15,10 @@ pub struct Header {
 
 impl Header {
     const UNSYNCHRONIZATION: u8 = 0x80;
-    const EXTENDED_HEADER: u8 = 0x40;
-    const _EXPERIMENTAL_INDICATOR: u8 = 0x20;
+    const COMPRESSION2: u8 = 0x40;
+    const EXTENDED_HEADER34: u8 = 0x40;
+
+    pub const MAJOR_VERSION2: u8 = 0x02;
     pub const MAJOR_VERSION3: u8 = 0x03;
     pub const MAJOR_VERSION4: u8 = 0x04;
 
@@ -33,12 +35,12 @@ impl Header {
         self.get_flag(Self::UNSYNCHRONIZATION)
     }
 
-    pub fn extended_header(&self) -> bool {
-        self.get_flag(Self::EXTENDED_HEADER)
+    pub fn extended_header34(&self) -> bool {
+        self.get_flag(Self::EXTENDED_HEADER34)
     }
 
-    pub fn _experimental_indicator(&self) -> bool {
-        self.get_flag(Self::_EXPERIMENTAL_INDICATOR)
+    pub fn compression2(&self) -> bool {
+        self.get_flag(Self::COMPRESSION2)
     }
 
     fn get_flag(&self, flag: u8) -> bool {

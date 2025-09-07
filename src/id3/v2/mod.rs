@@ -1,6 +1,7 @@
-mod frame;
+mod frame34;
 mod header;
 mod id3v2;
+mod v2_2;
 mod v2_3;
 mod v2_4;
 
@@ -17,13 +18,12 @@ use crate::{
     Comment, DataType, Error, Picture, PictureKind, Result, TagStore, Trap,
     TrapExt,
     bread::Bread,
+    id3::get_genre,
     parsers::{self, DateTime},
 };
 
 use self::header::*;
 pub use self::id3v2::*;
-
-// Implementation is based on: https://id3.org/id3v2.3.0
 
 /// Read ID3v2 tag without assuming that the reader is already at the correct
 /// position.
@@ -61,13 +61,14 @@ pub fn from_read(
     let header: Header = r.get()?;
 
     match header.major_version {
+        Header::MAJOR_VERSION2 => v2_2::from_bread(r, store, trap, header),
         Header::MAJOR_VERSION3 => v2_3::from_bread(r, store, trap, header),
         Header::MAJOR_VERSION4 => v2_4::from_bread(r, store, trap, header),
-        _ => Err(Error::Unsupported("ID3v2 other version than 3 and 4.")),
+        _ => Err(Error::Unsupported("ID3v2 other version than 2, 3 and 4.")),
     }
 }
 
-fn read_picture(
+fn read_picture34(
     r: &mut Bread<impl BufRead + Seek>,
     store: &mut impl TagStore,
     trap: &impl Trap,
@@ -120,16 +121,11 @@ fn read_picture(
         return trap.error(Error::InvalidLength);
     }
 
-    let (res, len) =
+    let (description, len) =
         r.witht_until_chunk(null, length as usize, trap, |s, t| {
             read_string_enc_nonull(enc, &s[..s.len() - null.len()], t)
         })?;
     length -= len as i64;
-
-    let Some(description) = res else {
-        r.seek_by(length)?;
-        return Ok(());
-    };
 
     if length < 0 {
         r.seek_by(length)?;
@@ -139,7 +135,7 @@ fn read_picture(
     let data = r.read_exact_owned(length as usize)?;
 
     store.add_picture(Picture::from_id3(
-        mime,
+        Some(mime),
         description,
         kind,
         data,
@@ -169,6 +165,16 @@ fn read_year(data: &[u8], trap: &impl Trap) -> Result<DateTime> {
     parsers::year(&year, trap)
 }
 
+fn read_time23(data: &[u8], trap: &impl Trap) -> Result<Duration> {
+    let s = read_string(data, trap)?;
+    parsers::time_only(&s)
+}
+
+fn read_date23(data: &[u8], trap: &impl Trap) -> Result<DateTime> {
+    let s = read_string(data, trap)?;
+    parsers::date(&s, trap)
+}
+
 fn read_length(data: &[u8], trap: &impl Trap) -> Result<Duration> {
     Ok(Duration::from_millis(read_number(data, trap)?))
 }
@@ -183,6 +189,49 @@ fn read_number<T: FromStr<Err = ParseIntError>>(
 fn read_num_of(data: &[u8], trap: &impl Trap) -> Result<(u32, Option<u32>)> {
     let s = read_string(data, trap)?;
     parsers::num_of(&s, trap)
+}
+
+fn read_genres23(data: &[u8], trap: &impl Trap) -> Result<Vec<String>> {
+    let s = read_string(data, trap)?;
+    let mut s = s.as_str();
+    let mut res = vec![];
+
+    loop {
+        if s.starts_with('(') {
+            s = &s[1..];
+        } else {
+            if !s.is_empty() {
+                res.push(s.to_string());
+            }
+            break;
+        }
+        if s.starts_with('(') {
+            res.push(s.to_string());
+            break;
+        }
+        let Some((pos, _)) = s.char_indices().find(|(_, c)| *c == ')') else {
+            trap.error(Error::InvalidGenreRef)?;
+            res.push(s.to_string());
+            break;
+        };
+        let gref = &s[..pos];
+        s = &s[pos + 1..];
+        let genre = match gref {
+            "RX" => Some("Remix"),
+            "CR" => Some("Cover"),
+            g => trap
+                .res(g.parse().map_err(|_| Error::InvalidGenreRef))?
+                .and_then(get_genre),
+        };
+        res.push(genre.unwrap_or(gref).to_string());
+    }
+
+    Ok(res)
+}
+
+fn read_string_list23(data: &[u8], trap: &impl Trap) -> Result<Vec<String>> {
+    let s = read_string(data, trap)?;
+    Ok(s.split('/').map(|a| a.to_string()).collect())
 }
 
 fn read_string(data: &[u8], trap: &impl Trap) -> Result<String> {

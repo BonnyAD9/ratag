@@ -23,6 +23,10 @@ pub fn syncsafe_be_u32(d: &[u8; 4]) -> u32 {
         | d[3] as u32
 }
 
+pub fn be_u24(d: &[u8; 3]) -> u32 {
+    (d[0] as u32) << 16 | (d[1] as u32) << 8 | d[2] as u32
+}
+
 pub fn ascii(d: &[u8], trap: &impl Trap) -> Result<String> {
     ASCII
         .decode(d, trap.decoder_trap())
