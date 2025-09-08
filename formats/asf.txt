@@ -5,36 +5,6 @@ taglib and ffmpeg implementation and reverse engineering asf files.
 
 All numbers are little endian.
 
-## Conventions
-
-`B` is byte `b` is bit.
-
-`$12 34 ab cd` is literal transcription of bytes as they appear in file.
-
-`0x1234` is hexadecimal number that will appear in file as little endian. (
-`0x1234abcd` is same as `$cd ab 34 12`)
-
-*??* signifies unknown information.
-
-### Data types
-
-| name        | size | description                     |
-|-------------|------|---------------------------------|
-| `GUID`      | 16B  | id                              |
-| `STRING[n]` | n    | UTF-8 LE null terminated string |
-| `STR[n]`    | n    | UTF-8 LE string                 |
-| `nB`        | 8    | unknown data                    |
-| `BYTES[n]`  | n    | binary data                     |
-| `...`       | ?    | other data given in description |
-| `INTw`      | w/8  | LE signed integer               |
-| `UINTw`     | w/8  | LE unsigned integer             |
-| `BOOL`      | 2    | boolean, 0 => false, _ => true  |
-| `WBOOL`     | 4    | boolean, 0 => false, _ => true  |
-
-Sintax `DATA_TYPE name` names the parameter with `name` so that it may be
-reffered to. The name is optional.
-
-<!--
 GUID: 16B binary id
 STR: UTF-16 LE null terminated string
 BOOL: 2B value - ==0 => false, !=0 => true
@@ -48,55 +18,63 @@ ATTR_TYPE: INT16: attribute type:
     5: INT16
     6: guid
 OBJ: object
--->
     
-## File structure
+## File contents
+OBJ: file header object
+GUID: ??
+UINT64: ??
+UCHAR: ??
+UCHAR: ??
 
-- `...` [file header object](#file-header-object).
-- `GUID` ??
-- `UINT64` ??
-- `UINT8` ??
-- `UINT8` ??
-- `...` data frames
+...: packets
 
 ## Object
+GUID: id
+INT64: object size including header (e.g. data size + 24)
+data based on object size
 
-- `GUID` object id
-- `UINT64` object size including the header (e.g. size of `data` + 24)
-- `... data` data of the object
+### File header
 
-Object is a block of metadata that has its id in form of a `GUID`, size in form
-of `INT64` and the data itself specific to the object type.
+GUID: "\x30\x26\xB2\x75\x8E\x66\xCF\x11\xA6\xD9\x00\xAA\x00\x62\xCE\x6C"
+INT64: size
 
-### File header object
+INT32: number of objects
+2B: ??
 
-- `$30 26 B2 75 8E 66 CF 11 A6 D9 00 AA 00 62 CE 6C` id
-- `INT64` size
-- `...` objects
-
-File header object encapsulates all metadata.
+...: objects
+    File properties object
+    Stream properties object
+    Content description object
+    Extended object description object
+    Header extension object
+    Codec list object
+    Content encrypption object
+    Extended content encryption object
+    Advanced content encryption object
+    ...??
 
 ### File properties object
 
-- `$A1 DC AB 8C 47 A9 CF 11 8E E4 00 C0 0C 20 53 65` id
-- `INT64` size
-- `GUID` file guid
-- `UINT64` file size in bytes (invalid if broadcasting)
-- `UINT64` time of creation in 100 ns units since 1.1.1601 (invalid if
-  broadcasting)
-- `UINT64` number of packets
-- `UINT64 duration` duration of file in 100 ns units
-- `UINT64 preroll` rimestamp of first packet in ms
-- `UINT32` flags
-    - `0x01` broadcast
-    - `0x02` seekable
-- `UINT32 min_packet_size` min packet size
-- `UINT32` max packet size (shall be same as `min_packet_size`)
-- `UINT32` max bitrate - bandwidth of stream in bps. Should be same as sum of
-  bitrates of individual streams.
+GUID: "\xA1\xDC\xAB\x8C\x47\xA9\xCF\x11\x8E\xE4\x00\xC0\x0C\x20\x53\x65"
+INT64: size
 
-Contains basic metadata about the stream. `duration` and `preroll` can be used
-to calculate the length of the stream.
+GUID: file guid
+UINT64: file size in bytes (invalid if broadcasting)
+UINT64: time of creation in 100 ns units since 1.1.1601 (invalid if
+    broadcasting)
+UINT64: number of packets
+UINT64: Duration in number of 100 ns intervals.
+UINT64: Time to send file in 100 ns units.
+UINT64: Preroll - timestamp of first packet in ms.
+UINT32: Flags:
+    0x01: broadcast
+    0x02: seekable
+UINT32: Min packet size (not larger than 2^29-1)
+UINT32: Max packet size (shall be same as min)
+UINT32: Max bitrate - bandwidth of stream in bps. Should be sum of individual
+    streams.
+
+...: ??
 
 ### Stream properties object
 
@@ -203,11 +181,13 @@ UINT16: value size
 GUID: "\xb5\x03\xbf_.\xa9\xcf\x11\x8e\xe3\x00\xc0\x0c Se"
 INT64: size
 
-GUID: ??
-2B: ??
+18B: ??
 INT32: data size
 
-...: Extension objects
+...: Extension objects:
+    Metadata object
+    Metadata library object
+    ...??
 
 ### Metadata object
 
