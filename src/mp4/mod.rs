@@ -140,6 +140,18 @@ fn read_udta(
             boxtype::META => {
                 read_meta(r, store, trap, bx.size_next)?;
             }
+            boxtype::CPRT if store.stores_data(DataType::Copyright) => {
+                let Some(size) = *bx.size_next else {
+                    r.seek(SeekFrom::End(0))?;
+                    return trap
+                        .error(Error::Unsupported("Size to end of file."));
+                };
+                if let Some(c) =
+                    r.witht(size as usize, trap, read_copyright)?
+                {
+                    store.set_copyright(c);
+                }
+            }
             _ => {
                 let Some(s) = *bx.size_next else {
                     break;
@@ -196,7 +208,7 @@ fn read_mvhd(
     r.useek_by(len)?;
 
     let dur = Duration::from_secs_f64(dur as f64 / ts as f64);
-    store.set_length(Some(dur));
+    store.set_length(dur);
 
     Ok(())
 }
@@ -228,6 +240,14 @@ fn read_meta(
     Ok(())
 }
 
+fn read_copyright(d: &[u8], trap: &impl Trap) -> Result<String> {
+    if d.len() < 6 {
+        return Err(Error::InvalidLength);
+    }
+
+    Ok(parsers::utf_8_nt(&d[6..], trap)?.1)
+}
+
 fn read_ilst(
     r: &mut Bread<impl BufRead + Seek>,
     store: &mut impl TagStore,
@@ -242,7 +262,7 @@ fn read_ilst(
         match bx.boxtype {
             boxtype::NAM if store.stores_data(DataType::Title) => {
                 read_annotation(r, trap, len, read_string, |s| {
-                    store.set_title(Some(s));
+                    store.set_title(s);
                     Ok(())
                 })?;
             }
@@ -273,14 +293,14 @@ fn read_ilst(
                     || store.stores_data(DataType::TrackCount) =>
             {
                 read_annotation(r, trap, len, read_num_of, |(t, c)| {
-                    store.set_track(Some(t));
-                    store.set_track_count(Some(c));
+                    store.set_track(t);
+                    store.set_track_count(c);
                     Ok(())
                 })?;
             }
             boxtype::ALB if store.stores_data(DataType::Album) => {
                 read_annotation(r, trap, len, read_string, |s| {
-                    store.set_album(Some(s));
+                    store.set_album(s);
                     Ok(())
                 })?;
             }
@@ -295,8 +315,8 @@ fn read_ilst(
                     || store.stores_data(DataType::DiscCount) =>
             {
                 read_annotation(r, trap, len, read_num_of, |(d, c)| {
-                    store.set_disc(Some(d));
-                    store.set_disc_count(Some(c));
+                    store.set_disc(d);
+                    store.set_disc_count(c);
                     Ok(())
                 })?;
             }

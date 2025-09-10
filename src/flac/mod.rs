@@ -76,7 +76,7 @@ pub fn from_read(
             {
                 let si: Streaminfo = r.get()?;
                 let secs = si.sample_cnt as f64 / si.sample_rate as f64;
-                store.set_length(Some(Duration::from_secs_f64(secs)));
+                store.set_length(Duration::from_secs_f64(secs));
             }
             MetadataBlockHeader::VORBISCOMMENT => {
                 vorbis::from_bread(&mut r, store, trap, false)?;

@@ -13,8 +13,8 @@ ATTR_TYPE: INT16: attribute type:
     0: STR
     1: BYTES
     2: BOOL
-    3: INT64
-    4: INT32
+    3: INT32
+    4: INT64
     5: INT16
     6: guid
 OBJ: object
@@ -146,11 +146,11 @@ UINT16: Bits per sample
 GUID: "\x33\x26\xB2\x75\x8E\x66\xCF\x11\xA6\xD9\x00\xAA\x00\x62\xCE\x6C"
 INT64: size
 
-INT32: title length (in bytes)
-INT32: artist length (in bytes)
-INT32: copyright length (in bytes)
-INT32: comment length (in bytes)
-INT32: rating length (in bytes)
+INT16: title length (in bytes)
+INT16: artist length (in bytes)
+INT16: copyright length (in bytes)
+INT16: comment length (in bytes)
+INT16: rating length (in bytes)
 
 STR: title
 STR: artist
@@ -163,7 +163,7 @@ STR: rating
 GUID: "\x40\xA4\xD0\xD2\x07\xE3\xD2\x11\x97\xF0\x00\xA0\xC9\x5E\xA8\x50"
 INT64: size
 
-INT32: count
+INT16: count
 
 ...: Attributes
 

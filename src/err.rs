@@ -30,6 +30,9 @@ pub enum Error {
     /// Vorbis framing bit is not set.
     #[error("Vorbis framing bit is not set.")]
     InvalidVorbisFramingBit,
+    /// Invalid data type.
+    #[error("Invalid data type.")]
+    InvalidDataType,
     /// Invalid time format.
     #[error("Invalid date format.")]
     InvalidTime,
@@ -48,4 +51,8 @@ pub enum Error {
     /// Any IO error.
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[error(transparent)]
+    TryFromSlice(#[from] std::array::TryFromSliceError),
+    #[error(transparent)]
+    TryFromInt(#[from] std::num::TryFromIntError),
 }

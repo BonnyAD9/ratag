@@ -1,0 +1,6 @@
+pub const FILE_HEADER: u128 = 0x3026_b275_8e66_cf11_a6d9_00aa_0062_ce6c;
+pub const FILE_PROPERTIES: u128 = 0xa1dc_ab8c_47a9_cf11_8ee4_00c0_0c20_5365;
+pub const CONTENT_DESCRIPTION: u128 =
+    0x3326_b275_8e66_cf11_a6d9_00aa_0062_ce6c;
+pub const EXTENDED_CONTENT_DESCRIPTION: u128 =
+    0x40a4_d0d2_07e3_d211_97f0_00a0_c95e_a850;

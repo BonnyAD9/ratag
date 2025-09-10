@@ -32,3 +32,5 @@ pub const TRK: u32 = u32::from_be_bytes(*b"\xa9trk");
 pub const TRKN: u32 = u32::from_be_bytes(*b"trkn");
 /// User data box.
 pub const UDTA: u32 = u32::from_be_bytes(*b"udta");
+/// Copyright
+pub const CPRT: u32 = u32::from_be_bytes(*b"cprt");

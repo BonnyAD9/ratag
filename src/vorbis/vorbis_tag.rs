@@ -80,15 +80,15 @@ impl VorbisTag {
                 continue;
             }
             match k.as_str() {
-                "TITLE" => store.set_title(Some(last(v))),
-                "ALBUM" => store.set_album(Some(last(v))),
+                "TITLE" => store.set_title(last(v)),
+                "ALBUM" => store.set_album(last(v)),
                 "TRACKNUMBER" if store.stores_data(DataType::Track) => {
                     if let Some((t, c)) =
                         trap.res(parsers::num_of(&last(v), trap))?
                     {
-                        store.set_track(Some(t));
+                        store.set_track(t);
                         if let Some(c) = c {
-                            store.set_track_count(Some(c));
+                            store.set_track_count(c);
                         }
                     }
                 }
@@ -114,26 +114,29 @@ impl VorbisTag {
                     if let Some((d, c)) =
                         trap.res(parsers::num_of(&last(v), trap))?
                     {
-                        store.set_disc(Some(d));
+                        store.set_disc(d);
                         if let Some(c) = c {
-                            store.set_disc_count(Some(c));
+                            store.set_disc_count(c);
                         }
                     }
                 }
                 "TRACKTOTAL" if store.stores_data(DataType::TrackCount) => {
                     if let Some(v) = trap.res(parsers::num(&last(v)))? {
-                        store.set_track_count(Some(v));
+                        store.set_track_count(v);
                     }
                 }
                 "DISCTOTAL" if store.stores_data(DataType::DiscCount) => {
                     if let Some(v) = trap.res(parsers::num(&last(v)))? {
-                        store.set_disc_count(Some(v));
+                        store.set_disc_count(v);
                     }
                 }
                 "COMMENT" if store.stores_data(DataType::Comments) => {
                     store.set_comments(
                         v.into_iter().map(Comment::from_value).collect(),
                     );
+                }
+                "COPYRIGHT" if store.stores_data(DataType::Copyright) => {
+                    store.set_copyright(last(v));
                 }
                 _ => {}
             }

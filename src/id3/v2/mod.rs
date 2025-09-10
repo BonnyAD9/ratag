@@ -15,8 +15,8 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Picture, PictureKind, Result, TagStore, Trap,
-    TrapExt,
+    Comment, DataType, Error, Picture, PictureKind, Popularimeter, Rating,
+    Result, TagStore, Trap, TrapExt,
     bread::Bread,
     id3::get_genre,
     parsers::{self, DateTime},
@@ -66,6 +66,24 @@ pub fn from_read(
         Header::MAJOR_VERSION4 => v2_4::from_bread(r, store, trap, header),
         _ => Err(Error::Unsupported("ID3v2 other version than 2, 3 and 4.")),
     }
+}
+
+fn read_popularimeter(d: &[u8], trap: &impl Trap) -> Result<Rating> {
+    let (l, email) = parsers::iso_8859_1_nt(d, trap)?;
+    if l >= d.len() {
+        return Err(Error::InvalidLength);
+    }
+    let rating = d[l];
+    let mut play_counter = 0;
+    for b in &d[l + 1..] {
+        play_counter = play_counter << 8 | *b as u64;
+    }
+
+    Ok(Rating::Popularimeter(Popularimeter {
+        email,
+        rating,
+        play_counter,
+    }))
 }
 
 fn read_picture34(

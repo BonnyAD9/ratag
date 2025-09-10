@@ -11,8 +11,9 @@ use crate::{
     bread::Bread,
     id3::v2::{
         encoding_null, header::Header, read_comment, read_date23,
-        read_genres23, read_length, read_num_of, read_string,
-        read_string_enc_nonull, read_string_list23, read_time23, read_year,
+        read_genres23, read_length, read_num_of, read_popularimeter,
+        read_string, read_string_enc_nonull, read_string_list23, read_time23,
+        read_year,
     },
     parsers,
     trap::{Trap, TrapExt},
@@ -33,6 +34,7 @@ pub fn from_bread(
     let mut pos = 0;
 
     let mut comments = vec![];
+    let mut ratings = vec![];
 
     while !store.done() && pos + 6 < header.size {
         let header: FrameHeader = r.get()?;
@@ -44,7 +46,7 @@ pub fn from_bread(
             0 => break,
             frame::TT2 if store.stores_data(DataType::Title) => {
                 if let Some(t) = r.witht(hsize, trap, read_string)? {
-                    store.set_title(Some(t));
+                    store.set_title(t);
                 }
             }
             frame::TP1 if store.stores_data(DataType::Artists) => {
@@ -59,7 +61,7 @@ pub fn from_bread(
             }
             frame::TAL if store.stores_data(DataType::Album) => {
                 if let Some(a) = r.witht(hsize, trap, read_string)? {
-                    store.set_album(Some(a));
+                    store.set_album(a);
                 }
             }
             frame::TPA
@@ -67,8 +69,10 @@ pub fn from_bread(
                     || store.stores_data(DataType::DiscCount) =>
             {
                 if let Some((d, c)) = r.witht(hsize, trap, read_num_of)? {
-                    store.set_disc(Some(d));
-                    store.set_disc_count(c);
+                    store.set_disc(d);
+                    if let Some(c) = c {
+                        store.set_disc_count(c);
+                    }
                 }
             }
             frame::TRK
@@ -76,8 +80,10 @@ pub fn from_bread(
                     || store.stores_data(DataType::TrackCount) =>
             {
                 if let Some((t, c)) = r.witht(hsize, trap, read_num_of)? {
-                    store.set_track(Some(t));
-                    store.set_track_count(c);
+                    store.set_track(t);
+                    if let Some(c) = c {
+                        store.set_track_count(c);
+                    }
                 }
             }
             frame::TYE if store.stores_data(DataType::Year) => {
@@ -92,12 +98,12 @@ pub fn from_bread(
             }
             frame::TIM if store.stores_data(DataType::Time) => {
                 if let Some(t) = r.witht(hsize, trap, read_time23)? {
-                    store.set_time(Some(t));
+                    store.set_time(t);
                 }
             }
             frame::TLE if store.stores_data(DataType::Length) => {
                 if let Some(l) = r.witht(hsize, trap, read_length)? {
-                    store.set_length(Some(l));
+                    store.set_length(l);
                 }
             }
             frame::COM if store.stores_data(DataType::Comments) => {
@@ -106,8 +112,26 @@ pub fn from_bread(
             frame::PIC => {
                 read_picture(&mut r, store, trap, header.size as i64)?;
             }
+            frame::TCR => {
+                if store.stores_data(DataType::Copyright)
+                    && let Some(c) = r.witht(hsize, trap, read_string)?
+                {
+                    store.set_copyright(c);
+                }
+            }
+            frame::POP if store.stores_data(DataType::Ratings) => {
+                ratings.extend(r.witht(hsize, trap, read_popularimeter)?);
+            }
             _ => r.seek_by(header.size as i64)?,
         }
+    }
+
+    if !comments.is_empty() {
+        store.set_comments(comments);
+    }
+
+    if !ratings.is_empty() {
+        store.set_ratings(ratings);
     }
 
     Ok(())

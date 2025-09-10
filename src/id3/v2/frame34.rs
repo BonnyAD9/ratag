@@ -22,6 +22,9 @@ pub const TPOS: u32 = u32::from_be_bytes(*b"TPOS");
 pub const TRCK: u32 = u32::from_be_bytes(*b"TRCK");
 /// Year
 pub const TYER: u32 = u32::from_be_bytes(*b"TYER");
-
 /// Comment
 pub const COMM: u32 = u32::from_be_bytes(*b"COMM");
+/// Copyright
+pub const TCOP: u32 = u32::from_be_bytes(*b"TCOP");
+/// Popularimeter (rating)
+pub const POPM: u32 = u32::from_be_bytes(*b"POPM");

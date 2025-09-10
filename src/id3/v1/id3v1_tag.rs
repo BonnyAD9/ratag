@@ -124,16 +124,16 @@ impl Id3v1Tag {
         trap: &impl Trap,
     ) -> Result<()> {
         if !self.title.is_empty() {
-            store.set_title(Some(self.title));
+            store.set_title(self.title);
         }
         if !self.artist.is_empty() {
             store.set_artists(vec![self.artist]);
         }
         if !self.album.is_empty() {
-            store.set_album(Some(self.album));
+            store.set_album(self.album);
         }
         if let Some(y) = self.year {
-            store.set_year(Some(y as i32));
+            store.set_year(y as i32);
         }
         if !self.comment.is_empty() {
             store.set_comments(vec![Comment::from_value(self.comment)]);
@@ -151,7 +151,7 @@ impl Id3v1Tag {
         }
 
         if let Some(t) = self.track {
-            store.set_track(Some(t as u32));
+            store.set_track(t as u32);
         }
 
         Ok(())

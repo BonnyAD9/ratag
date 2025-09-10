@@ -22,3 +22,7 @@ pub const TLE: u32 = u32::from_be_bytes(*b"\0TLE");
 pub const COM: u32 = u32::from_be_bytes(*b"\0COM");
 /// Picture
 pub const PIC: u32 = u32::from_be_bytes(*b"\0PIC");
+/// Copyright
+pub const TCR: u32 = u32::from_be_bytes(*b"\0TCR");
+/// Popularimeter (rating)
+pub const POP: u32 = u32::from_be_bytes(*b"\0POP");

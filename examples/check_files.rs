@@ -7,6 +7,7 @@ use ratag::{Error, Result, TagStore, read_tag_from_file, trap::Trap};
 
 const EXTENSIONS: &[&str] = &[
     "mp3", "mpga", "bit", "flac", "mp4", "m4a", "m4p", "m4b", "m4r", "m4v",
+    "asf", "wma", "wmv"
 ];
 
 #[derive(Default)]
@@ -35,12 +36,12 @@ impl TagStore for TrackStore {
         true
     }
 
-    fn set_length(&mut self, length: Option<Duration>) {
-        self.length = length;
+    fn set_length(&mut self, length: Duration) {
+        self.length = Some(length);
     }
 
-    fn set_title(&mut self, title: Option<String>) {
-        self.title = title;
+    fn set_title(&mut self, title: String) {
+        self.title = Some(title);
     }
 }
 

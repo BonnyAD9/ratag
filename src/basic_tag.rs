@@ -42,12 +42,12 @@ impl TagStore for BasicTag {
         )
     }
 
-    fn set_title(&mut self, title: Option<String>) {
-        self.title = title;
+    fn set_title(&mut self, title: String) {
+        self.title = Some(title);
     }
 
-    fn set_album(&mut self, album: Option<String>) {
-        self.album = album;
+    fn set_album(&mut self, album: String) {
+        self.album = Some(album);
     }
 
     fn set_artists(&mut self, artists: Vec<String>) {
@@ -58,19 +58,19 @@ impl TagStore for BasicTag {
         self.genres = genres;
     }
 
-    fn set_track(&mut self, track: Option<u32>) {
-        self.track = track;
+    fn set_track(&mut self, track: u32) {
+        self.track = Some(track);
     }
 
-    fn set_year(&mut self, year: Option<i32>) {
-        self.year = year;
+    fn set_year(&mut self, year: i32) {
+        self.year = Some(year);
     }
 
-    fn set_disc(&mut self, disc: Option<u32>) {
-        self.disc = disc;
+    fn set_disc(&mut self, disc: u32) {
+        self.disc = Some(disc);
     }
 
-    fn set_length(&mut self, length: Option<Duration>) {
-        self.length = length;
+    fn set_length(&mut self, length: Duration) {
+        self.length = Some(length);
     }
 }
