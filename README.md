@@ -17,13 +17,16 @@ Data that this library aims to be capable of reading:
   count, Comments, Pictures, Copyright, Ratings
 
 Recognized file extensions: `mp3`, `mpga`, `bit`, `flac`, `mp4`, `m4a`, `m4p`,
-`m4b`, `m4r`, `m4v`, `asf`, `wma`, `wmv`. File extensions are used only to
+`m4b`, `m4r`, `m4v`, `asf`, `wma`, `wmv`, `wav`, `wave`, `avi`, `ani`, `pal`,
+`rdi`, `dib`, `rmi`, `rmm`, `webp`. As you can see, the list contains many file
+extensions that are not asociated with audio. This is because lot of different
+file formats use the same format for tagging. File extensions are used only to
 speedup the process of figuring out which tag format should be used. If that
 fails or the extension is not recognized, the tag format will be figured out
 from the file contents.
 
-Supported tag formats: `ID3v1`, `ID3v2`, `flac`, `mp4`, `ASF`. See below for
-detailed description.
+Supported tag formats: `ID3v1`, `ID3v2`, `flac`, `mp4`, `ASF`, `RIFF`. See
+below for detailed description.
 
 Supported tag formats (detailed):
 - `ID3v1` (`ID3v1.0`, `ID3v1.1`, `ID3v1.2`)
@@ -54,6 +57,10 @@ Supported tag formats (detailed):
     - All fields in content description.
     - Some fields in extended content description: `WM/AlbumTitle`, `WM/Year`,
       `WM/TrackNumber`, `WM/PartOfSet`, `WM/Genre` and `WM/Picture`
+- `RIFF`
+    - Supported fields in `INFO` chunk: `IART`, `ICMT`, `ICOP`, `IGNR`, `ICRD`,
+      `INAM`, `IPRD`, `IPRT`, `PRT1`, `PRT2`.
+    - Length of `WAVE` form using `fmt` and length of `data`.
 
 Other parsers:
 - `vorbis comment`

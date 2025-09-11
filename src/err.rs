@@ -51,8 +51,10 @@ pub enum Error {
     /// Any IO error.
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    /// Failed to convert slice to array.
     #[error(transparent)]
     TryFromSlice(#[from] std::array::TryFromSliceError),
+    /// Failed to convert integer types.
     #[error(transparent)]
     TryFromInt(#[from] std::num::TryFromIntError),
 }

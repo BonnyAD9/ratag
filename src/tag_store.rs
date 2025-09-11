@@ -57,8 +57,10 @@ pub trait TagStore {
     /// Set the picture.
     fn add_picture(&mut self, picture: Picture) {}
 
+    /// Set the copyright of a track.
     fn set_copyright(&mut self, copyright: String) {}
 
+    /// Set user ratings.
     fn set_ratings(&mut self, ratings: Vec<Rating>) {}
 }
 

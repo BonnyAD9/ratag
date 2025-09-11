@@ -33,6 +33,16 @@ pub fn ascii(d: &[u8], trap: &impl Trap) -> Result<String> {
         .map_err(|_| Error::InvalidEncoding)
 }
 
+pub fn ascii_nt(d: &[u8], trap: &impl Trap) -> Result<(usize, String)> {
+    let (end, len) = if let Some(end) = d.iter().position(|a| *a == 0) {
+        (end, end + 1)
+    } else {
+        trap.error(Error::StringNotTerminated)?;
+        (d.len(), d.len())
+    };
+    Ok((len, ascii(&d[..end], trap)?))
+}
+
 pub fn iso_8859_1(d: &[u8], trap: &impl Trap) -> Result<String> {
     ISO_8859_1
         .decode(d, trap.decoder_trap())

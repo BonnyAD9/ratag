@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 // #![warn(missing_docs)]
 
+/// Module for reading tags from asf files.
 pub mod asf;
 mod basic_tag;
 mod bread;
@@ -15,6 +16,8 @@ pub mod id3;
 pub mod mp4;
 mod parsers;
 mod picture_tag;
+/// Module for reading tags from riff files.
+pub mod riff;
 mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
@@ -28,7 +31,10 @@ use std::{
     path::Path,
 };
 
-use crate::{asf::Asf, bread::Bread, flac::Flac, id3::Id3, mp4::Mp4, trap::*};
+use crate::{
+    asf::Asf, bread::Bread, flac::Flac, id3::Id3, mp4::Mp4, riff::Riff,
+    trap::*,
+};
 
 pub use self::{
     basic_tag::*, containers::*, data_type::*, err::*, picture_tag::*,
@@ -37,7 +43,7 @@ pub use self::{
 
 macro_rules! all_tags {
     () => {
-        [&Id3, &Flac, &Mp4, &Asf]
+        [&Id3, &Flac, &Mp4, &Asf, &Riff]
     };
 }
 

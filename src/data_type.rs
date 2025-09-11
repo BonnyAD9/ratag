@@ -31,6 +31,8 @@ pub enum DataType {
     Comments,
     /// Picture.
     Picture(PictureKind),
+    /// Copyright.
     Copyright,
+    /// Ratings by users.
     Ratings,
 }

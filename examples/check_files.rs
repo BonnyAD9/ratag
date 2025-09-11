@@ -7,7 +7,7 @@ use ratag::{Error, Result, TagStore, read_tag_from_file, trap::Trap};
 
 const EXTENSIONS: &[&str] = &[
     "mp3", "mpga", "bit", "flac", "mp4", "m4a", "m4p", "m4b", "m4r", "m4v",
-    "asf", "wma", "wmv"
+    "asf", "wma", "wmv",
 ];
 
 #[derive(Default)]

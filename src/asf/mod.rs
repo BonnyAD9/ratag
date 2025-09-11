@@ -23,6 +23,8 @@ const INT32: u16 = 3;
 const INT64: u16 = 4;
 const INT16: u16 = 5;
 
+/// The Asf tag reader.
+#[derive(Debug)]
 pub struct Asf;
 
 impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Asf {
@@ -35,6 +37,7 @@ impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Asf {
     }
 }
 
+/// Read asf tag from file.
 pub fn from_file(
     f: impl AsRef<Path>,
     store: &mut impl TagStore,
@@ -43,6 +46,7 @@ pub fn from_file(
     from_read(BufReader::new(File::open(f)?), store, trap)
 }
 
+/// Read asf file from stream. Seeks to the correct position before reading.
 pub fn from_seek(
     mut r: impl BufRead + Seek,
     store: &mut impl TagStore,
@@ -52,6 +56,8 @@ pub fn from_seek(
     from_read(r, store, trap)
 }
 
+/// Read asf tags from stream. Assumes that the stream is seeked to the correct
+/// position.
 pub fn from_read(
     r: impl BufRead + Seek,
     store: &mut impl TagStore,
