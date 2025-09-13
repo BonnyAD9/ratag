@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::{Comment, DataType, Picture, Rating, parsers::DateTime};
+use crate::{Comment, DataType, Picture, Rating, TagType, parsers::DateTime};
 
 /// Generic storage for data from tag.
 #[allow(unused_variables)]
@@ -13,6 +13,9 @@ pub trait TagStore {
     fn done(&self) -> bool {
         false
     }
+
+    /// Sets the tag type. This is often called multiple times.
+    fn set_tag_type(&mut self, tag: TagType) {}
 
     /// Set the title of the track.
     fn set_title(&mut self, title: String) {}

@@ -1,12 +1,13 @@
 use std::path::Path;
 
 use crate::{
-    DataType, Picture, PictureKind, Result, TagStore, read_tag_from_file, trap,
+    DataType, Picture as Pic, PictureKind, Result, TagStore,
+    read_tag_from_file, trap,
 };
 
 /// Tag that reads picture from the file.
 #[derive(Debug)]
-pub struct PictureTag {
+pub struct Picture {
     /// Accepted types of picture.
     pub types: PictureKind,
     /// Maximum number of pictures to load.
@@ -14,10 +15,10 @@ pub struct PictureTag {
     /// Precedence of picture kinds. First has higher precedence.
     pub precedence: Vec<PictureKind>,
     /// Loaded pictures.
-    pub pictures: Vec<Picture>,
+    pub pictures: Vec<Pic>,
 }
 
-impl TagStore for PictureTag {
+impl TagStore for Picture {
     fn stores_data(&self, typ: DataType) -> bool {
         let DataType::Picture(pk) = typ else {
             return false;
@@ -31,7 +32,7 @@ impl TagStore for PictureTag {
         self.find_low_prec(pk).is_some()
     }
 
-    fn add_picture(&mut self, picture: Picture) {
+    fn add_picture(&mut self, picture: Pic) {
         if !picture.kind.intersects(self.types) {
             return;
         }
@@ -53,7 +54,7 @@ impl TagStore for PictureTag {
     }
 }
 
-impl PictureTag {
+impl Picture {
     /// Gets configuration that will load any picture, but it will try to get
     /// the best cover.
     pub fn preferably_cover() -> Self {
@@ -77,7 +78,7 @@ impl PictureTag {
     }
 
     /// Get the first best picture.
-    pub fn picture(&self) -> Option<&Picture> {
+    pub fn picture(&self) -> Option<&Pic> {
         self.pictures
             .iter()
             .min_by_key(|p| self.get_precedence(p.kind).unwrap_or(usize::MAX))

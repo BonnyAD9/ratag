@@ -14,7 +14,7 @@ use std::{
 
 use crate::{
     Comment, DataType, Error, Picture, PictureKind, Result, TagRead, TagStore,
-    TagStoreExt,
+    TagStoreExt, TagType,
     bread::Bread,
     id3::genres::get_genre,
     parsers::{self, DateTime},
@@ -71,6 +71,8 @@ pub fn from_read(
     if bx.boxtype != boxtype::FTYP {
         return Err(Error::NoTag);
     }
+
+    store.set_tag_type(TagType::Mp4);
 
     while !store.done() {
         match bx.boxtype {

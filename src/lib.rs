@@ -3,7 +3,6 @@
 
 /// Module for reading tags from asf files.
 pub mod asf;
-mod basic_tag;
 mod bread;
 mod containers;
 mod data_type;
@@ -15,9 +14,10 @@ pub mod id3;
 /// Module for reading tags for mp4 files.
 pub mod mp4;
 mod parsers;
-mod picture_tag;
 /// Module for reading tags from riff files.
 pub mod riff;
+/// Tagging containers.
+pub mod tag;
 mod tag_read;
 mod tag_store;
 /// Module for managing how to handle errors.
@@ -37,8 +37,7 @@ use crate::{
 };
 
 pub use self::{
-    basic_tag::*, containers::*, data_type::*, err::*, picture_tag::*,
-    tag_read::*, tag_store::*,
+    containers::*, data_type::*, err::*, tag_read::*, tag_store::*,
 };
 
 macro_rules! all_tags {

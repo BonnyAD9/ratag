@@ -5,7 +5,7 @@ use self::frame_header::*;
 use std::io::{BufRead, Seek};
 
 use crate::{
-    DataType, Error, PictureKind, Result, TagStore, TagStoreExt,
+    DataType, Error, PictureKind, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
     id3::{
         genres::get_genre,
@@ -29,6 +29,8 @@ pub fn from_bread(
     trap: &impl Trap,
     header: Header,
 ) -> Result<()> {
+    store.set_tag_type(TagType::Id3v2(4));
+
     let mut pos = 0;
 
     if header.extended_header34() {

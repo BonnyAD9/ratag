@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use ratag::{BasicTag, Result, id3, trap};
+use ratag::{Result, id3, tag, trap};
 
 fn main() -> ExitCode {
     match start() {
@@ -13,7 +13,7 @@ fn main() -> ExitCode {
 }
 
 fn start() -> Result<()> {
-    let mut tag = BasicTag::default();
+    let mut tag = tag::Basic::default();
     id3::v2::from_file(
         "/home/kubas/music/Avicii - Taste The Feeling (Avicii Vs. Conrad Sewell).mp3",
         &mut tag,

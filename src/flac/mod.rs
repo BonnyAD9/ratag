@@ -16,7 +16,7 @@ use std::{
 };
 
 use crate::{
-    DataType, Error, Picture, PictureKind, Result, TagRead, TagStore,
+    DataType, Error, Picture, PictureKind, Result, TagRead, TagStore, TagType,
     bread::Bread, trap::Trap, vorbis,
 };
 
@@ -65,6 +65,8 @@ pub fn from_read(
     if !r.expect(b"fLaC")? {
         return Err(Error::NoTag);
     }
+
+    store.set_tag_type(TagType::Flac);
 
     let mut next = true;
     while next && !store.done() {

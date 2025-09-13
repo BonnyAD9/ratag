@@ -8,6 +8,7 @@ use std::io::{BufRead, Seek};
 
 use crate::{
     DataType, Error, Picture, PictureKind, Result, TagStore, TagStoreExt,
+    TagType,
     bread::Bread,
     id3::v2::{
         encoding_null, header::Header, read_comment, read_date23,
@@ -27,6 +28,8 @@ pub fn from_bread(
     trap: &impl Trap,
     header: Header,
 ) -> Result<()> {
+    store.set_tag_type(TagType::Id3v2(2));
+
     if header.compression2() {
         return Err(Error::Unsupported("ID3v2.2 compression."));
     }

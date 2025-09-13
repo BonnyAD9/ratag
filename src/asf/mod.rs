@@ -14,7 +14,7 @@ use std::{
 
 use crate::{
     Comment, DataType, Error, Picture, PictureKind, Rating, Result, TagRead,
-    TagStore, bread::Bread, parsers, trap::Trap,
+    TagStore, TagType, bread::Bread, parsers, trap::Trap,
 };
 
 const STR: u16 = 0;
@@ -69,6 +69,8 @@ pub fn from_read(
     if header.guid != guid::FILE_HEADER {
         return Err(Error::NoTag);
     }
+
+    store.set_tag_type(TagType::Asf);
 
     let mut count: u32 = r.get_le()?;
     r.seek_by(2)?;

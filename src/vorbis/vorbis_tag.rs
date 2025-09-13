@@ -1,7 +1,7 @@
 use std::{collections::HashMap, io::BufRead};
 
 use crate::{
-    Comment, DataType, Error, Result, TagStore, TagStoreExt,
+    Comment, DataType, Error, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
     parsers::{self, DateTime},
     trap::{Trap, TrapExt},
@@ -68,6 +68,8 @@ impl VorbisTag {
         store: &mut impl TagStore,
         trap: &impl Trap,
     ) -> Result<()> {
+        store.set_tag_type(TagType::VorbisComment);
+
         fn last<T>(v: Vec<T>) -> T {
             v.into_iter().next_back().unwrap()
         }

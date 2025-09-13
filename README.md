@@ -14,7 +14,7 @@ alongside with the readers supported in this library.
 
 Data that this library aims to be capable of reading:
 - Title, Album, Artists, Track, Track count, Year, Date, Time, Disc, Disc
-  count, Comments, Pictures, Copyright, Ratings
+  count, Comments, Pictures, Copyright, Ratings, Tag type
 
 Recognized file extensions: `mp3`, `mpga`, `bit`, `flac`, `mp4`, `m4a`, `m4p`,
 `m4b`, `m4r`, `m4v`, `asf`, `wma`, `wmv`, `wav`, `wave`, `avi`, `ani`, `pal`,

@@ -35,4 +35,6 @@ pub enum DataType {
     Copyright,
     /// Ratings by users.
     Ratings,
+    /// Type of tag.
+    TagType,
 }

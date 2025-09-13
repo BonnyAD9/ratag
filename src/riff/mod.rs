@@ -1,4 +1,5 @@
-mod chunk;
+/// Chunks within riff.
+pub mod chunk;
 mod chunk_header;
 mod wave_fmt;
 
@@ -14,7 +15,7 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Result, TagRead, TagStore, TagStoreExt,
+    Comment, DataType, Error, Result, TagRead, TagStore, TagStoreExt, TagType,
     bread::Bread,
     parsers::{self, DateTime},
     trap::Trap,
@@ -74,6 +75,8 @@ pub fn from_read(
     }
 
     let typ: u32 = r.get_be()?;
+
+    store.set_tag_type(TagType::Riff(typ));
 
     let mut pos = 0;
 

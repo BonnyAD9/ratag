@@ -1,9 +1,9 @@
 use std::{fs::File, io::Write};
 
-use ratag::{PictureTag, Result};
+use ratag::{Result, tag};
 
 pub fn main() -> Result<()> {
-    let tag = PictureTag::read_cover(
+    let tag = tag::Picture::read_cover(
         // "/home/kubas/music/4tet - 1st - 02 How Deep Is Your Love.mp3"
         // "/home/kubas/music/AJR - Neotheater - 01 Next Up Forever.flac"
         // "/home/kubas/music/Imagine Dragons - iTunes Session - 01 It's Time.m4a",

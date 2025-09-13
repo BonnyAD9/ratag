@@ -5,8 +5,8 @@ use std::{
 };
 
 use crate::{
-    Comment, Error, Result, TagStore, id3::genres::get_genre, parsers,
-    trap::Trap,
+    Comment, Error, Result, TagStore, TagType, id3::genres::get_genre,
+    parsers, trap::Trap,
 };
 
 /// Data stored in ID3v1 tag.
@@ -123,6 +123,14 @@ impl Id3v1Tag {
         store: &mut impl TagStore,
         trap: &impl Trap,
     ) -> Result<()> {
+        if self.sub_genre.is_some() {
+            store.set_tag_type(TagType::Id3v1(2));
+        } else if self.track.is_some() {
+            store.set_tag_type(TagType::Id3v1(1));
+        } else {
+            store.set_tag_type(TagType::Id3v1(0));
+        }
+
         if !self.title.is_empty() {
             store.set_title(self.title);
         }

@@ -3,7 +3,7 @@ mod frame_header;
 use std::io::{BufRead, Seek};
 
 use crate::{
-    DataType, Error, PictureKind, Result, TagStore, TagStoreExt,
+    DataType, Error, PictureKind, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
     id3::v2::{
         frame34, header::Header, read_comment, read_date23, read_genres23,
@@ -23,6 +23,8 @@ pub fn from_bread(
     trap: &impl Trap,
     header: Header,
 ) -> Result<()> {
+    store.set_tag_type(TagType::Id3v2(3));
+
     if header.unsynchronization() {
         return Err(Error::Unsupported("ID3v2.3 unsynchronization."));
     }

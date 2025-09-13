@@ -4,7 +4,7 @@ use crate::{DataType, Result, TagStore, read_tag_from_file, trap};
 
 /// Tag storage with basic information.
 #[derive(Debug, Default)]
-pub struct BasicTag {
+pub struct Basic {
     /// Title of the song.
     pub title: Option<String>,
     /// Albumb of the song.
@@ -23,7 +23,7 @@ pub struct BasicTag {
     pub length: Option<Duration>,
 }
 
-impl BasicTag {
+impl Basic {
     /// Reads the basic tag from file. Supports all tags supported by this
     /// crate. Recoverable errors are skipped.
     pub fn from_file(f: impl AsRef<Path>) -> Result<Box<Self>> {
@@ -33,7 +33,7 @@ impl BasicTag {
     }
 }
 
-impl TagStore for BasicTag {
+impl TagStore for Basic {
     fn stores_data(&self, typ: DataType) -> bool {
         use DataType::*;
         matches!(
