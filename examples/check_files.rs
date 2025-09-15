@@ -87,7 +87,7 @@ fn try_file(p: impl AsRef<Path>) {
         println!("error: {e}");
         //}
     } else {
-        if store.length.is_none() && store.title.is_none() {
+        if store.title.is_none() {
             trap.0.set(true);
             println!("info: no length and title set.");
         }

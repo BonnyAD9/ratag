@@ -15,7 +15,8 @@ fn main() -> ExitCode {
 fn start() -> Result<()> {
     let mut tag = tag::Basic::default();
     id3::v2::from_file(
-        "/home/kubas/music/Avicii - Taste The Feeling (Avicii Vs. Conrad Sewell).mp3",
+        //"/home/kubas/music/Avicii - Taste The Feeling (Avicii Vs. Conrad Sewell).mp3",
+        "/home/kubas/dl/Panic at the Disco - Pray for the Wicked/01 (Fuck a) Silver Lining.mp3",
         &mut tag,
         &trap::Warn,
     )?;

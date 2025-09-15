@@ -8,9 +8,7 @@ mod v2_4;
 use std::{
     fs::File,
     io::{BufRead, BufReader, Seek},
-    num::ParseIntError,
     path::Path,
-    str::FromStr,
     time::Duration,
 };
 
@@ -194,14 +192,17 @@ fn read_date23(data: &[u8], trap: &impl Trap) -> Result<DateTime> {
 }
 
 fn read_length(data: &[u8], trap: &impl Trap) -> Result<Duration> {
-    Ok(Duration::from_millis(read_number(data, trap)?))
-}
+    let s = read_string(data, trap)?;
+    let e = match s.parse() {
+        Ok(r) => return Ok(Duration::from_millis(r)),
+        Err(e) => e,
+    };
 
-fn read_number<T: FromStr<Err = ParseIntError>>(
-    data: &[u8],
-    trap: &impl Trap,
-) -> Result<T> {
-    parsers::num(&read_string(data, trap)?)
+    if let Ok(r) = s.parse() {
+        Ok(Duration::from_secs_f64(r))
+    } else {
+        Err(e.into())
+    }
 }
 
 fn read_num_of(data: &[u8], trap: &impl Trap) -> Result<(u32, Option<u32>)> {
