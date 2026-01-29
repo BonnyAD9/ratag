@@ -26,6 +26,9 @@ pub trait TagStore {
     /// Artists within the song.
     fn set_artists(&mut self, artists: Vec<String>) {}
 
+    /// Set album artist.
+    fn set_album_artist(&mut self, artist: String) {}
+
     /// Genres of the song.
     fn set_genres(&mut self, genres: Vec<String>) {}
 

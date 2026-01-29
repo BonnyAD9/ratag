@@ -15,8 +15,10 @@ fn main() -> ExitCode {
 fn start() -> Result<()> {
     let mut tag = tag::Basic::default();
     id3::v2::from_file(
+        //"/home/kubas/music/Gotye - Like Drawing Blood - 01 Like Drawing Blood.mp3", // .2
+        //"/home/kubas/music/Alan Walker - Different World - 11 Darkside.mp3", // .3
+        "/home/kubas/music/ZRNÍ - Voní 01 Dítě vidí psa.mp3", // .4
         //"/home/kubas/music/Avicii - Taste The Feeling (Avicii Vs. Conrad Sewell).mp3",
-        "/home/kubas/dl/Panic at the Disco - Pray for the Wicked/01 (Fuck a) Silver Lining.mp3",
         &mut tag,
         &trap::Warn,
     )?;

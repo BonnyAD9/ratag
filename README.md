@@ -14,7 +14,7 @@ alongside with the readers supported in this library.
 
 Data that this library aims to be capable of reading:
 - Title, Album, Artists, Track, Track count, Year, Date, Time, Disc, Disc
-  count, Comments, Pictures, Copyright, Ratings, Tag type
+  count, Comments, Pictures, Copyright, Ratings, Tag type, Album artist
 
 Recognized file extensions: `mp3`, `mpga`, `bit`, `flac`, `mp4`, `m4a`, `m4p`,
 `m4b`, `m4r`, `m4v`, `asf`, `wma`, `wmv`, `wav`, `wave`, `avi`, `ani`, `pal`,
@@ -34,11 +34,12 @@ Supported tag formats (detailed):
 - `ID3v2` (`ID3v2.2`, `ID3v2.3`, `ID3v2.4`)
     - Unsynchronization, compression and ecryption is not supported.
     - ID3v2.2 only frames `TT2`, `TP1`, `TCO`, `TAL`, `TPA`, `TRK`, `TYE`,
-      `TDA`, `TIM`, `TLE`, `COM`, `TCR`, `POP` and `PIC`.
+      `TDA`, `TIM`, `TLE`, `COM`, `TCR`, `POP`, `PIC` and `TP2`.
     - ID3v2.3 only frames `APIC`, `COMM`, `TALB`, `TCON`, `TDAT`, `TIT2`,
-      `TIME`, `TLEN`, `TPE1`, `TPOS`, `TRCK`, `TCOP`, `POPM` and `TYER`.
+      `TIME`, `TLEN`, `TPE1`, `TPOS`, `TRCK`, `TCOP`, `POPM`, `TYER` and
+      `TPE2`.
     - ID3v2.4 only frames `TIT2`, `TALB`, `TRCK`, `TPOS`, `TPE1`, `TLEN`,
-      `TCON`, `TDRL`, `COMM`, `TCOP`, `POPM` and `APIC`.
+      `TCON`, `TDRL`, `COMM`, `TCOP`, `POPM`, `APIC` and `TPE2`.
     - ID3v2.4 updates are not supported.
     - ID3v2.4 appended frames are not supported.
 - `flac`
@@ -46,17 +47,18 @@ Supported tag formats (detailed):
     - Picture.
     - Vorbis comment can extract only `TITLE`, `ALBUM`, `TRACKNUMBER`,
       `ARTIST`, `GENRE`, `DATE`, `DISCNUMBER`, `TRACKTOTAL`, `DISCTOTAL`,
-      `COPYRIGHT` and `COMMENT`
+      `COPYRIGHT`, `COMMENT`, `ALBUMARTIST` and `ALBUM ARTIST`
 - `mp4`
     - Song length at `moov.mvhd`.
     - Copyright at `moov.udta.cprt`.
     - Metadata at `moov.udta.meta.ilst`: ` nam`, ` cmt`, ` day`, ` ART`,
-      ` trk`, `trkn`, ` alb`, `gnre`, `disk`, `covr`
+      ` trk`, `trkn`, ` alb`, `gnre`, `disk`, `covr`, `aART`
 - `ASF`
     - Length in file properties.
     - All fields in content description.
     - Some fields in extended content description: `WM/AlbumTitle`, `WM/Year`,
-      `WM/TrackNumber`, `WM/PartOfSet`, `WM/Genre` and `WM/Picture`
+      `WM/TrackNumber`, `WM/PartOfSet`, `WM/Genre`, `WM/Picture` and
+      `WM/AlbumArtist`
 - `RIFF`
     - Supported fields in `INFO` chunk: `IART`, `ICMT`, `ICOP`, `IGNR`, `ICRD`,
       `INAM`, `IPRD`, `IPRT`, `PRT1`, `PRT2`.

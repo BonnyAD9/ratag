@@ -335,6 +335,12 @@ fn read_ilst(
                     Ok(())
                 })?;
             }
+            boxtype::AART if store.stores_data(DataType::AlbumArtist) => {
+                read_annotation(r, trap, len, read_string, |s| {
+                    store.set_album_artist(s);
+                    Ok(())
+                })?;
+            }
             _ => {
                 let Some(s) = *bx.size_next else {
                     break;

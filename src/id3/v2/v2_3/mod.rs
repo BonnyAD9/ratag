@@ -139,6 +139,11 @@ pub fn from_bread(
             frame34::POPM if store.stores_data(DataType::Ratings) => {
                 ratings.extend(r.witht(hsize, trap, read_popularimeter)?);
             }
+            frame34::TPE2 if store.stores_data(DataType::AlbumArtist) => {
+                if let Some(a) = r.witht(hsize, trap, read_string)? {
+                    store.set_album_artist(a);
+                }
+            }
             _ => {
                 r.seek_by(header.size as i64)?;
             }

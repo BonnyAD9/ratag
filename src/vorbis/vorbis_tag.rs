@@ -140,6 +140,11 @@ impl VorbisTag {
                 "COPYRIGHT" if store.stores_data(DataType::Copyright) => {
                     store.set_copyright(last(v));
                 }
+                "ALBUMARTIST" | "ALBUM ARTIST"
+                    if store.stores_data(DataType::AlbumArtist) =>
+                {
+                    store.set_album_artist(last(v));
+                }
                 _ => {}
             }
         }

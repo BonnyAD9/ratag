@@ -3,7 +3,9 @@ use std::{
 };
 
 use encoding::DecoderTrap;
-use ratag::{Error, Result, TagStore, read_tag_from_file, trap::Trap};
+use ratag::{
+    Error, Result, TagStore, TagType, read_tag_from_file, tag, trap::Trap,
+};
 
 const EXTENSIONS: &[&str] = &[
     "mp3", "mpga", "bit", "flac", "mp4", "m4a", "m4p", "m4b", "m4r", "m4v",
@@ -77,6 +79,33 @@ fn try_dir(p: impl AsRef<Path>) -> Result<()> {
 }
 
 fn try_file(p: impl AsRef<Path>) {
+    //probe(p);
+    check_errors(p);
+}
+
+#[allow(unused)]
+fn probe(p: impl AsRef<Path>) {
+    let mut store = tag::Probe::top_level();
+    let trap = TrackTrap::default();
+
+    if let Err(e) = read_tag_from_file(p.as_ref(), &mut store, &trap) {
+        //if !matches!(e, Error::Unsupported(_)) {
+        trap.0.set(true);
+        println!("error: {e}");
+        //}
+    } else {
+        if store.tags.contains(&TagType::Id3v2(0x4)) {
+            println!("probe match: {:?}", p.as_ref());
+        }
+    }
+
+    if trap.0.get() {
+        println!("^IN FILE: {}", p.as_ref().display());
+        println!("{:->80}", "")
+    }
+}
+
+fn check_errors(p: impl AsRef<Path>) {
     let mut store = TrackStore::default();
     let trap = TrackTrap::default();
     //eprintln!("FILE: {}", p.as_ref().display());

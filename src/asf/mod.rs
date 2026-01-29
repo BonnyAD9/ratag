@@ -179,6 +179,13 @@ fn read_extended_content_description(
             "WM/Picture" => {
                 read_picture(r, store, trap, typ, vlen as i64)?;
             }
+            "WM/AlbumArtist" if store.stores_data(DataType::AlbumArtist) => {
+                if let Some(t) =
+                    r.witht(vsize, trap, |d, t| get_string(d, t, typ))?
+                {
+                    store.set_album_artist(t);
+                }
+            }
             _ => r.seek_by(vlen as i64)?,
         }
     }

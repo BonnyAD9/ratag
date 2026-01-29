@@ -16,6 +16,8 @@ pub const TIME: u32 = u32::from_be_bytes(*b"TIME");
 pub const TLEN: u32 = u32::from_be_bytes(*b"TLEN");
 /// Artists
 pub const TPE1: u32 = u32::from_be_bytes(*b"TPE1");
+/// Album artist
+pub const TPE2: u32 = u32::from_be_bytes(*b"TPE2");
 /// Disc
 pub const TPOS: u32 = u32::from_be_bytes(*b"TPOS");
 /// Track

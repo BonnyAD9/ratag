@@ -115,15 +115,18 @@ pub fn from_bread(
             frame::PIC => {
                 read_picture(&mut r, store, trap, header.size as i64)?;
             }
-            frame::TCR => {
-                if store.stores_data(DataType::Copyright)
-                    && let Some(c) = r.witht(hsize, trap, read_string)?
-                {
+            frame::TCR if store.stores_data(DataType::Copyright) => {
+                if let Some(c) = r.witht(hsize, trap, read_string)? {
                     store.set_copyright(c);
                 }
             }
             frame::POP if store.stores_data(DataType::Ratings) => {
                 ratings.extend(r.witht(hsize, trap, read_popularimeter)?);
+            }
+            frame::TP2 if store.stores_data(DataType::AlbumArtist) => {
+                if let Some(a) = r.witht(hsize, trap, read_string)? {
+                    store.set_album_artist(a);
+                }
             }
             _ => r.seek_by(header.size as i64)?,
         }

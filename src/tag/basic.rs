@@ -11,6 +11,8 @@ pub struct Basic {
     pub album: Option<String>,
     /// Artists in this song.
     pub artists: Vec<String>,
+    /// Album artist.
+    pub album_artist: Option<String>,
     /// Genres of this song.
     pub genres: Vec<String>,
     /// Track number within the album.
@@ -38,7 +40,15 @@ impl TagStore for Basic {
         use DataType::*;
         matches!(
             typ,
-            Title | Album | Artists | Genres | Track | Year | Disc | Length
+            Title
+                | Album
+                | Artists
+                | AlbumArtist
+                | Genres
+                | Track
+                | Year
+                | Disc
+                | Length
         )
     }
 
@@ -52,6 +62,10 @@ impl TagStore for Basic {
 
     fn set_artists(&mut self, artists: Vec<String>) {
         self.artists = artists;
+    }
+
+    fn set_album_artist(&mut self, artist: String) {
+        self.album_artist = Some(artist);
     }
 
     fn set_genres(&mut self, genres: Vec<String>) {

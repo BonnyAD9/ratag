@@ -2,6 +2,8 @@
 pub const ALB: u32 = u32::from_be_bytes(*b"\xa9alb");
 /// Artist box.
 pub const ART: u32 = u32::from_be_bytes(*b"\xa9ART");
+/// Album artist box.
+pub const AART: u32 = u32::from_be_bytes(*b"aART");
 /// Comment box.
 pub const CMT: u32 = u32::from_be_bytes(*b"\xa9cmt");
 /// Cover image box.

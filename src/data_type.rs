@@ -9,6 +9,8 @@ pub enum DataType {
     Album,
     /// Artists in the song.
     Artists,
+    /// Album artist of the song.
+    AlbumArtist,
     /// Genres of the song.
     Genres,
     /// Track number of the song within album.

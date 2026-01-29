@@ -2,6 +2,8 @@
 pub const TT2: u32 = u32::from_be_bytes(*b"\0TT2");
 /// Artists
 pub const TP1: u32 = u32::from_be_bytes(*b"\0TP1");
+/// Album artist
+pub const TP2: u32 = u32::from_be_bytes(*b"\0TP2");
 /// Genres
 pub const TCO: u32 = u32::from_be_bytes(*b"\0TCO");
 /// Album

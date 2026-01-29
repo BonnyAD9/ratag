@@ -83,6 +83,8 @@ impl<R: Seek> Bread<R> {
 }
 
 impl<R: BufRead> Bread<R> {
+    /// Read exactly the given amount of data and process it with the given
+    /// function. Errors emited by the function are trapped.
     pub fn witht<T, Tr: Trap>(
         &mut self,
         len: usize,
