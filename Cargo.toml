@@ -12,4 +12,4 @@ keywords = ["audio", "tags", "id3", "flac"]
 [dependencies]
 bitflags = "2.10.0"
 encoding = "0.2.33"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
