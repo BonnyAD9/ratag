@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## future
+## v0.1.1
 ### New features
 - Add support for album artist.
 
