@@ -15,7 +15,8 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Result, TagRead, TagStore, TagStoreExt, TagType,
+    Comment, DataType, Error, Result, TagFormat, TagRead, TagStore,
+    TagStoreExt, TagType,
     bread::Bread,
     parsers::{self, DateTime},
     trap::Trap,
@@ -29,14 +30,16 @@ use crate::{
 #[derive(Debug)]
 pub struct Riff;
 
-impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Riff {
+impl TagFormat for Riff {
     fn extensions(&self) -> &[&str] {
         &[
             "wav", "wave", "avi", "ani", "pal", "rdi", "dib", "rmi", "rmm",
             "webp",
         ]
     }
+}
 
+impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Riff {
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {
         from_seek(r, store, trap)
     }

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::{
-    DataType, Picture as Pic, PictureKind, Result, TagStore,
+    DataType, Picture as Pic, PictureKind, Result, TagRetrieve, TagStore,
     read_tag_from_file, trap,
 };
 
@@ -97,5 +97,11 @@ impl Picture {
             .max()
             .filter(|(_, p)| *p > prec)
             .map(|(i, _)| i)
+    }
+}
+
+impl TagRetrieve for Picture {
+    fn get_pictures(&self) -> &[Pic] {
+        &self.pictures
     }
 }

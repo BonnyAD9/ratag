@@ -2,7 +2,7 @@ use std::{
     cell::Cell, env::args, fs::read_dir, path::Path, rc::Rc, time::Duration,
 };
 
-use encoding::DecoderTrap;
+use encoding::{DecoderTrap, EncoderTrap};
 use ratag::{
     Error, Result, TagStore, TagType, read_tag_from_file, tag, trap::Trap,
 };
@@ -24,6 +24,10 @@ impl Trap for TrackTrap {
 
     fn decoder_trap(&self) -> DecoderTrap {
         DecoderTrap::Replace
+    }
+
+    fn encoder_trap(&self) -> encoding::EncoderTrap {
+        EncoderTrap::Replace
     }
 }
 

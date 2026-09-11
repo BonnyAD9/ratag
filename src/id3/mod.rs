@@ -10,7 +10,7 @@ use std::{
     path::Path,
 };
 
-use crate::{Error, Result, TagRead, TagStore, trap::Trap};
+use crate::{Error, Result, TagFormat, TagRead, TagStore, trap::Trap};
 
 use self::genres::*;
 
@@ -18,11 +18,13 @@ use self::genres::*;
 #[derive(Debug)]
 pub struct Id3;
 
-impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Id3 {
+impl TagFormat for Id3 {
     fn extensions(&self) -> &[&str] {
         &["mp3", "mpga", "bit"]
     }
+}
 
+impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Id3 {
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {
         from_seek(r, store, trap)
     }

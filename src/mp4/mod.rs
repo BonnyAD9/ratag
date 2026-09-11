@@ -13,8 +13,8 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Picture, PictureKind, Result, TagRead, TagStore,
-    TagStoreExt, TagType,
+    Comment, DataType, Error, Picture, PictureKind, Result, TagFormat,
+    TagRead, TagStore, TagStoreExt, TagType,
     bread::Bread,
     id3::genres::get_genre,
     parsers::{self, DateTime},
@@ -28,11 +28,13 @@ use crate::{
 #[derive(Debug)]
 pub struct Mp4;
 
-impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Mp4 {
+impl TagFormat for Mp4 {
     fn extensions(&self) -> &[&str] {
         &["mp4", "m4a", "m4p", "m4b", "m4r", "m4v"]
     }
+}
 
+impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Mp4 {
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {
         from_seek(r, store, trap)
     }

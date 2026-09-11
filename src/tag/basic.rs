@@ -1,6 +1,8 @@
 use std::{path::Path, time::Duration};
 
-use crate::{DataType, Result, TagStore, read_tag_from_file, trap};
+use crate::{
+    DataType, Result, TagRetrieve, TagStore, read_tag_from_file, trap,
+};
 
 /// Tag storage with basic information.
 #[derive(Debug, Default)]
@@ -86,5 +88,43 @@ impl TagStore for Basic {
 
     fn set_length(&mut self, length: Duration) {
         self.length = Some(length);
+    }
+}
+
+impl TagRetrieve for Basic {
+    fn get_title(&self) -> Option<&str> {
+        self.title.as_deref()
+    }
+
+    fn get_album(&self) -> Option<&str> {
+        self.album.as_deref()
+    }
+
+    fn get_artists(&self) -> &[String] {
+        &self.artists
+    }
+
+    fn get_album_artist(&self) -> Option<&str> {
+        self.album_artist.as_deref()
+    }
+
+    fn get_genres(&self) -> &[String] {
+        &self.genres
+    }
+
+    fn get_track(&self) -> Option<u32> {
+        self.track
+    }
+
+    fn get_year(&self) -> Option<i32> {
+        self.year
+    }
+
+    fn get_disc(&self) -> Option<u32> {
+        self.disc
+    }
+
+    fn get_length(&self) -> Option<Duration> {
+        self.length
     }
 }

@@ -5,6 +5,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the ratag crate.
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum Error {
     /// There is no tag.
     #[error("No tag.")]
@@ -12,6 +13,12 @@ pub enum Error {
     /// Encoding is invalid. This is usually recoverable.
     #[error("Invalid encoding.")]
     InvalidEncoding,
+    /// Failed to encode value to the given encoding.
+    #[error("Failed to encode value to a target encoding.")]
+    FailedToEncode,
+    /// Tag version is invalid.
+    #[error("Tag version is invalid.")]
+    InvalidVersion,
     /// Expected different length of data.
     #[error("Invalid length of data.")]
     InvalidLength,
@@ -42,6 +49,9 @@ pub enum Error {
     /// Missing BOM.
     #[error("Missing BOM.")]
     MissingBom,
+    /// The value is out of range.
+    #[error("The value of {0} is out of range.")]
+    OutOfRange(&'static str),
     /// Feature required to parse the tag is not supported.
     #[error("Not supported: {0}")]
     Unsupported(&'static str),

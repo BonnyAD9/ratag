@@ -1,4 +1,5 @@
 pub use encoding::DecoderTrap;
+use encoding::EncoderTrap;
 
 use crate::{Error, Result};
 
@@ -15,6 +16,9 @@ pub trait Trap {
 
     /// What to do with decoding errors.
     fn decoder_trap(&self) -> DecoderTrap;
+
+    /// What to do with encoding errors.
+    fn encoder_trap(&self) -> EncoderTrap;
 }
 
 pub(crate) trait TrapExt {

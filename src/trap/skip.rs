@@ -1,4 +1,4 @@
-use encoding::DecoderTrap;
+use encoding::{DecoderTrap, EncoderTrap};
 
 use crate::{Error, Result, trap::Trap};
 
@@ -12,5 +12,9 @@ impl Trap for Skip {
 
     fn decoder_trap(&self) -> DecoderTrap {
         DecoderTrap::Replace
+    }
+
+    fn encoder_trap(&self) -> encoding::EncoderTrap {
+        EncoderTrap::Ignore
     }
 }

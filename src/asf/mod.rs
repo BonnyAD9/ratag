@@ -13,8 +13,8 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Picture, PictureKind, Rating, Result, TagRead,
-    TagStore, TagType, bread::Bread, parsers, trap::Trap,
+    Comment, DataType, Error, Picture, PictureKind, Rating, Result, TagFormat,
+    TagRead, TagStore, TagType, bread::Bread, parsers, trap::Trap,
 };
 
 const STR: u16 = 0;
@@ -27,11 +27,13 @@ const INT16: u16 = 5;
 #[derive(Debug)]
 pub struct Asf;
 
-impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Asf {
+impl TagFormat for Asf {
     fn extensions(&self) -> &[&str] {
         &["asf", "wma", "wmv"]
     }
+}
 
+impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Asf {
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {
         from_seek(r, store, trap)
     }

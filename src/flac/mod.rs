@@ -16,8 +16,8 @@ use std::{
 };
 
 use crate::{
-    DataType, Error, Picture, PictureKind, Result, TagRead, TagStore, TagType,
-    bread::Bread, trap::Trap, vorbis,
+    DataType, Error, Picture, PictureKind, Result, TagFormat, TagRead,
+    TagStore, TagType, bread::Bread, trap::Trap, vorbis,
 };
 
 // Implementation is based on: https://www.rfc-editor.org/rfc/rfc9639.html
@@ -26,11 +26,13 @@ use crate::{
 #[derive(Debug)]
 pub struct Flac;
 
-impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Flac {
+impl TagFormat for Flac {
     fn extensions(&self) -> &[&str] {
         &["flac"]
     }
+}
 
+impl<R: BufRead + Seek, S: TagStore, T: Trap> TagRead<R, S, T> for Flac {
     fn store(&self, r: &mut R, store: &mut S, trap: &T) -> Result<()> {
         from_seek(r, store, trap)
     }
