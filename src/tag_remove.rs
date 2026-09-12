@@ -1,7 +1,7 @@
-use crate::{Result, TagType};
+use crate::{Result, TagFormat, TagType};
 
 /// Trait for tags that can remouve themself from a stream.
-pub trait TagRemove<W, T> {
+pub trait TagRemove<W, T>: TagFormat {
     /// Remove the tag from the stream.
     ///
     /// Returns the tag that was removed. If there is no tag, returns

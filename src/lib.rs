@@ -251,6 +251,79 @@ pub fn write_tag_to_file<R: TagRetrieve, T: Trap>(
     write_any_tag_to_file(tags, path, r, mode, trap)
 }
 
+/// Remove one of the tags from stream.
+pub fn remove_any_tag<
+    'a,
+    W: 'a,
+    T: 'a,
+    I: IntoIterator<Item = &'a dyn TagRemove<W, T>>,
+>(
+    tags: I,
+    w: &mut W,
+    trap: &T,
+) -> Result<TagType> {
+    for t in tags {
+        match t.tag_remove(w, trap) {
+            Ok(t) => return Ok(t),
+            Err(Error::NoTag) => continue,
+            e => return e,
+        }
+    }
+    Err(Error::NoTag)
+}
+
+/// Removes one of the tags from the file.
+pub fn remove_any_tag_from_file<
+    'a,
+    T: 'a,
+    I: IntoIterator<Item = &'a dyn TagRemove<NamedFile, T>>,
+>(
+    tags: I,
+    path: impl AsRef<Path>,
+    trap: &T,
+) -> Result<TagType> {
+    let path = path.as_ref();
+    let mut w = NamedFile::modify(path)?;
+    let Some(ext) = path.extension() else {
+        return remove_any_tag(tags, &mut w, trap);
+    };
+
+    let mut primary = vec![];
+    let mut secondary = vec![];
+
+    for t in tags {
+        if t.extensions().iter().any(|e| *e == ext) {
+            primary.push(t);
+        } else {
+            secondary.push(t);
+        }
+    }
+
+    remove_any_tag(primary.into_iter().chain(secondary), &mut w, trap)
+}
+
+/// Removes tag from the given stream.
+/// 
+/// Currently only ID3v1 is supported.
+pub fn remove_tag<W: Read + Seek + SetLength, T: Trap>(
+    w: &mut W,
+    trap: &T,
+) -> Result<TagType> {
+    let tags: [&dyn TagRemove<W, T>; _] = [&id3::v1::Id3v1];
+    remove_any_tag(tags, w, trap)
+}
+
+/// Removes tag from the given file.
+/// 
+/// Currently only ID3v1 is supported.
+pub fn remove_tag_from_file<T: Trap>(
+    path: impl AsRef<Path>,
+    trap: &T,
+) -> Result<TagType> {
+    let tags: [&dyn TagRemove<NamedFile, T>; _] = [&id3::v1::Id3v1];
+    remove_any_tag_from_file(tags, path, trap)
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

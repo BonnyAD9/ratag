@@ -8,7 +8,7 @@
 - New error variants `FailedToEncode`, `InvalidVersion` and `OutOfRange`.
 
 ### New features
-- Support writing ID3v1.
+- Support writing and removing ID3v1.
 - New ID3v1 api:
     - Constants `ID3v1::LEN0` and `ID3v1::LEN2`.
     - New constructors `ID3v1Tag::from_seek_ver`, `ID3v1Tag::from_read_ver`,
@@ -26,7 +26,9 @@
       file.
 - New functions `write_any_tag`, `write_any_tag_to_file`, `write_tag` and
   `write_tag_to_file` for writing tags.
-- New trait `SetLength`.
+- New functions `remove_any_tag`, `remove_any_tag_from_file`, `remove_tag` and
+  `remove_tag_from_file` for removing tags from file.
+- New traits `SetLength` and `AtomicSwap`.
 
 ## v0.1.1
 ### New features
