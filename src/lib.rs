@@ -303,7 +303,7 @@ pub fn remove_any_tag_from_file<
 }
 
 /// Removes tag from the given stream.
-/// 
+///
 /// Currently only ID3v1 is supported.
 pub fn remove_tag<W: Read + Seek + SetLength, T: Trap>(
     w: &mut W,
@@ -314,7 +314,7 @@ pub fn remove_tag<W: Read + Seek + SetLength, T: Trap>(
 }
 
 /// Removes tag from the given file.
-/// 
+///
 /// Currently only ID3v1 is supported.
 pub fn remove_tag_from_file<T: Trap>(
     path: impl AsRef<Path>,
