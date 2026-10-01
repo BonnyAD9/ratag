@@ -67,3 +67,5 @@ Supported tag formats (detailed):
 Other parsers:
 - `vorbis comment`
     - fully supported when given stream with correct position
+
+Support for writing is in progress. Currently only `ID3v1` supports writing.
