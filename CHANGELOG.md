@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## future
+## v0.2.0
 ### Breaking changes
 - Move `TagRead::extensions` into separate trait `TagFormat`.
 - `Trap` now requires new method `Trap::encoder_trap`.
