@@ -10,7 +10,7 @@ license = "GPL-3.0"
 keywords = ["audio", "tags", "id3", "flac"]
 
 [dependencies]
-bitflags = "2.10.0"
+bitflags = "2.13.2"
 encoding = "0.2.33"
 tempfile = "3.27.0"
-thiserror = "2.0.18"
+thiserror = "2.0.21"
