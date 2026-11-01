@@ -16,6 +16,7 @@ pub mod id3;
 /// Module for reading tags for mp4 files.
 pub mod mp4;
 mod named_file;
+pub mod ogg;
 mod parsers;
 /// Module for reading tags from riff files.
 pub mod riff;
@@ -30,8 +31,9 @@ mod tag_store;
 mod tag_write;
 /// Module for managing how to handle errors.
 pub mod trap;
-/// Module for parsing vorbis comments.
 pub mod vorbis;
+/// Module for parsing vorbis comments.
+pub mod vorbis_comment;
 mod write_mode;
 
 use std::{
@@ -42,7 +44,7 @@ use std::{
 
 use crate::{
     asf::Asf, bread::Bread, flac::Flac, id3::Id3, mp4::Mp4,
-    named_file::NamedFile, riff::Riff, tag_write::TagWrite, trap::*,
+    named_file::NamedFile, ogg::Ogg, riff::Riff, tag_write::TagWrite, trap::*,
 };
 
 pub use self::{
@@ -52,7 +54,7 @@ pub use self::{
 
 macro_rules! all_tags {
     () => {
-        [&Id3, &Flac, &Mp4, &Asf, &Riff]
+        [&Id3, &Flac, &Mp4, &Asf, &Riff, &Ogg(())]
     };
 }
 

@@ -17,7 +17,7 @@ use std::{
 
 use crate::{
     DataType, Error, Picture, PictureKind, Result, TagFormat, TagRead,
-    TagStore, TagType, bread::Bread, trap::Trap, vorbis,
+    TagStore, TagType, bread::Bread, trap::Trap, vorbis_comment,
 };
 
 // Implementation is based on: https://www.rfc-editor.org/rfc/rfc9639.html
@@ -83,10 +83,10 @@ pub fn from_read(
                 store.set_length(Duration::from_secs_f64(secs));
             }
             MetadataBlockHeader::VORBISCOMMENT => {
-                vorbis::from_bread(&mut r, store, trap, false)?;
+                vorbis_comment::from_bread(&mut r, store, trap, false)?;
             }
             MetadataBlockHeader::PICTURE => {
-                read_picture(&mut r, store, trap, header.length as i64)?;
+                seek_picture(&mut r, store, trap, header.length as i64)?;
             }
             _ => r.seek_by(header.length as i64)?,
         }
@@ -95,12 +95,23 @@ pub fn from_read(
     Ok(())
 }
 
-fn read_picture(
+fn seek_picture(
     r: &mut Bread<impl BufRead + Seek>,
     store: &mut impl TagStore,
     trap: &impl Trap,
-    mut len: i64,
+    len: i64,
 ) -> Result<()> {
+    let len = read_picture(r, store, trap, len)?;
+    r.seek_by(len)?;
+    Ok(())
+}
+
+pub(crate) fn read_picture(
+    r: &mut Bread<impl BufRead>,
+    store: &mut impl TagStore,
+    trap: &impl Trap,
+    mut len: i64,
+) -> Result<i64> {
     let typ: u32 = r.get_be()?;
     len -= 4;
     let kind = if typ < u8::MAX as u32
@@ -113,8 +124,7 @@ fn read_picture(
     };
 
     if !store.stores_data(DataType::Picture(kind)) {
-        r.seek_by(len)?;
-        return Ok(());
+        return Ok(len);
     }
 
     let mut l: u32 = r.get_be()?;
@@ -166,7 +176,5 @@ fn read_picture(
         data,
     });
 
-    r.seek_by(len)?;
-
-    Ok(())
+    Ok(len)
 }

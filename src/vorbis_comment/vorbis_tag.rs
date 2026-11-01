@@ -1,8 +1,13 @@
-use std::{collections::HashMap, io::BufRead};
+use std::{
+    collections::HashMap,
+    io::{BufRead, BufReader, Cursor},
+};
 
 use crate::{
-    Comment, DataType, Error, Result, TagStore, TagStoreExt, TagType,
+    Comment, DataType, Error, PictureKind, Result, TagStore, TagStoreExt,
+    TagType,
     bread::Bread,
+    flac,
     parsers::{self, DateTime},
     trap::{Trap, TrapExt},
 };
@@ -56,7 +61,9 @@ impl VorbisTag {
 
         if framing_bit {
             let b = r.next()?;
-            if b == 0 {}
+            if (b & 0x01) == 0 {
+                trap.error(Error::VorbisFramingBitUnset)?;
+            }
         }
 
         Ok(Self { vendor, comments })
@@ -78,6 +85,9 @@ impl VorbisTag {
         }
 
         for (k, v) in self.comments {
+            if store.done() {
+                break;
+            }
             if v.is_empty() {
                 continue;
             }
@@ -144,6 +154,26 @@ impl VorbisTag {
                     if store.stores_data(DataType::AlbumArtist) =>
                 {
                     store.set_album_artist(last(v));
+                }
+                "METADATA_BLOCK_PICTURE"
+                    if store.stores_data(DataType::Picture(
+                        PictureKind::all(),
+                    )) =>
+                {
+                    for p in v {
+                        let mut r = Bread::new(BufReader::new(
+                            base64::read::DecoderReader::new(
+                                Cursor::new(p),
+                                &base64::engine::general_purpose::STANDARD,
+                            ),
+                        ));
+                        flac::read_picture(
+                            &mut r,
+                            store,
+                            trap,
+                            i64::MAX >> 1,
+                        )?;
+                    }
                 }
                 _ => {}
             }

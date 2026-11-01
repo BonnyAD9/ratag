@@ -49,6 +49,18 @@ pub enum Error {
     /// Missing BOM.
     #[error("Missing BOM.")]
     MissingBom,
+    /// All supported streams in file failed. Returned by ogg.
+    #[error("All supported streams in file failed.")]
+    NoSuccessfulStream,
+    /// The ogg packet for vorbis is too short to be valid.
+    #[error("Ogg Vorbis packet is too short.")]
+    OggVorbisPacketTooShort,
+    /// Ogg packet in vorbis stream is not vorbis packet.
+    #[error("Ogg packet is not vorbis.")]
+    OggPacketNotVorbis,
+    /// Vorbis framing bit is unset.
+    #[error("Vorbis framing bit is unset.")]
+    VorbisFramingBitUnset,
     /// The value is out of range.
     #[error("The value of {0} is out of range.")]
     OutOfRange(&'static str),

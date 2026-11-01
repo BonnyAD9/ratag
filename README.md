@@ -18,15 +18,15 @@ Data that this library aims to be capable of reading:
 
 Recognized file extensions: `mp3`, `mpga`, `bit`, `flac`, `mp4`, `m4a`, `m4p`,
 `m4b`, `m4r`, `m4v`, `asf`, `wma`, `wmv`, `wav`, `wave`, `avi`, `ani`, `pal`,
-`rdi`, `dib`, `rmi`, `rmm`, `webp`. As you can see, the list contains many file
-extensions that are not asociated with audio. This is because lot of different
-file formats use the same format for tagging. File extensions are used only to
-speedup the process of figuring out which tag format should be used. If that
-fails or the extension is not recognized, the tag format will be figured out
-from the file contents.
+`rdi`, `dib`, `rmi`, `rmm`, `webp`, `ogg`. As you can see, the list contains
+many file extensions that are not asociated with audio. This is because lot of
+different file formats use the same format for tagging. File extensions are
+used only to speedup the process of figuring out which tag format should be
+used. If that fails or the extension is not recognized, the tag format will be
+figured out from the file contents.
 
-Supported tag formats: `ID3v1`, `ID3v2`, `flac`, `mp4`, `ASF`, `RIFF`. See
-below for detailed description.
+Supported tag formats: `ID3v1`, `ID3v2`, `flac`, `mp4`, `ASF`, `RIFF`,
+`Ogg Vorbis`. See below for detailed description.
 
 Supported tag formats (detailed):
 - `ID3v1` (`ID3v1.0`, `ID3v1.1`, `ID3v1.2`)
@@ -47,7 +47,8 @@ Supported tag formats (detailed):
     - Picture.
     - Vorbis comment can extract only `TITLE`, `ALBUM`, `TRACKNUMBER`,
       `ARTIST`, `GENRE`, `DATE`, `DISCNUMBER`, `TRACKTOTAL`, `DISCTOTAL`,
-      `COPYRIGHT`, `COMMENT`, `ALBUMARTIST` and `ALBUM ARTIST`
+      `COPYRIGHT`, `COMMENT`, `ALBUMARTIST`, `ALBUM ARTIST` and
+      `METADATA_BLOCK_PICTURE`.
 - `mp4`
     - Song length at `moov.mvhd`.
     - Copyright at `moov.udta.cprt`.
@@ -58,11 +59,16 @@ Supported tag formats (detailed):
     - All fields in content description.
     - Some fields in extended content description: `WM/AlbumTitle`, `WM/Year`,
       `WM/TrackNumber`, `WM/PartOfSet`, `WM/Genre`, `WM/Picture` and
-      `WM/AlbumArtist`
+      `WM/AlbumArtist`.
 - `RIFF`
     - Supported fields in `INFO` chunk: `IART`, `ICMT`, `ICOP`, `IGNR`, `ICRD`,
       `INAM`, `IPRD`, `IPRT`, `PRT1`, `PRT2`.
     - Length of `WAVE` form using `fmt` and length of `data`.
+- `Ogg Vorbis`
+    - Vorbis comment can extract only `TITLE`, `ALBUM`, `TRACKNUMBER`,
+      `ARTIST`, `GENRE`, `DATE`, `DISCNUMBER`, `TRACKTOTAL`, `DISCTOTAL`,
+      `COPYRIGHT`, `COMMENT`, `ALBUMARTIST`, `ALBUM ARTIST` and
+      `METADATA_BLOCK_PICTURE`.
 
 Other parsers:
 - `vorbis comment`

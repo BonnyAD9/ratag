@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## future
+### New features
+- Add support for reading `Ogg Vorbis`.
+- Support reading pictures from `VorbisComment`.
+
+### Changes
+- `VorbisComment` will now check the framing bit.
+- Module `vorbis` has been renamed to `vorbis_comment` because the module
+  `vorbis` is now used by the actual vorbis implementation. The new module
+  still reexports `vorbis_comment`, but this may change in the future.
+
 ## v0.2.0
 ### Breaking changes
 - Move `TagRead::extensions` into separate trait `TagFormat`.

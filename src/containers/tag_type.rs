@@ -13,8 +13,15 @@ pub enum TagType {
     Asf,
     /// Riff (WAVE -> [`crate::riff::chunk::WAVE`])
     Riff(u32),
-    /// Vorbis comment. (usually combined with [`TagType::Flac`])
+    /// Vorbis comment. (usually combined with [`TagType::Flac`] or
+    /// [`TagType::Ogg`] and [`TagType::Vorbis`])
     VorbisComment,
+    /// Ogg, (usually combined with [`TagType::Vorbis`] and
+    /// [`TagType::VorbisComment`])
+    Ogg,
+    /// Vorbis, (usually combined with [`TagType::Ogg`] and
+    /// [`TagType::VorbisComment`])
+    Vorbis,
     /// Other tag format (by some foregin tag reader)
     Other(&'static str),
 }
