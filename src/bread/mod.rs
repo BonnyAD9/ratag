@@ -3,6 +3,7 @@ use std::io::{BufRead, Read, Seek, SeekFrom};
 mod breadable;
 mod breadable_be;
 mod breadable_le;
+pub(crate) mod utf8_char;
 
 use crate::{Result, Trap, TrapExt};
 
@@ -22,6 +23,17 @@ impl<R: Read> Bread<R> {
         self.make_size(len);
         self.read.read_exact(&mut self.buf[..len])?;
         Ok(&self.buf)
+    }
+
+    pub fn read_exact_to(
+        &mut self,
+        len: usize,
+        res: &mut Vec<u8>,
+    ) -> Result<()> {
+        let l = res.len();
+        res.resize(l + len, 0);
+        self.read.read_exact(&mut res[l..l + len])?;
+        Ok(())
     }
 
     pub fn read_exact_owned(&mut self, len: usize) -> Result<Vec<u8>> {

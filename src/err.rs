@@ -22,6 +22,9 @@ pub enum Error {
     /// Expected different length of data.
     #[error("Invalid length of data.")]
     InvalidLength,
+    /// Invalid language code.
+    #[error("Invalid language code.")]
+    InvalidLanguage,
     /// Invalid genre reference in id3. This is usually recoverable.
     #[error("Invalid id3v1 genre reference.")]
     InvalidGenreRef,
@@ -49,6 +52,8 @@ pub enum Error {
     /// Missing BOM.
     #[error("Missing BOM.")]
     MissingBom,
+    #[error("Data is too long to be written.")]
+    DataTooLong,
     /// The value is out of range.
     #[error("The value of {0} is out of range.")]
     OutOfRange(&'static str),

@@ -3,13 +3,13 @@ use std::io::BufRead;
 use crate::{
     Result,
     bread::{Bread, Breadable},
-    parsers,
+    formatters, parsers,
 };
 
 pub struct Header {
     pub major_version: u8,
-    pub _minor_version: u8,
-    flags: u8,
+    pub minor_version: u8,
+    pub flags: u8,
     pub size: u32,
 }
 
@@ -25,7 +25,7 @@ impl Header {
     pub fn from_bytes(d: &[u8; 7]) -> Self {
         Self {
             major_version: d[0],
-            _minor_version: d[1],
+            minor_version: d[1],
             flags: d[3],
             size: parsers::syncsafe_be_u32(d[3..].try_into().unwrap()),
         }
@@ -41,6 +41,15 @@ impl Header {
 
     pub fn compression2(&self) -> bool {
         self.get_flag(Self::COMPRESSION2)
+    }
+
+    pub fn to_bytes(&self) -> [u8; 7] {
+        let mut res = [0; 7];
+        res[0] = self.major_version;
+        res[1] = self.minor_version;
+        res[2] = self.flags;
+        res[3..].copy_from_slice(&formatters::syncsafe_be_u32(self.size));
+        res
     }
 
     fn get_flag(&self, flag: u8) -> bool {

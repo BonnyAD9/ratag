@@ -18,6 +18,13 @@ impl FrameHeader {
             size: parsers::be_u24(d[3..].try_into().unwrap()),
         }
     }
+
+    pub fn to_bytes(&self) -> [u8; 6] {
+        let mut res = [0; 6];
+        res[0..3].copy_from_slice(&self.id.to_be_bytes()[1..]);
+        res[3..].copy_from_slice(&self.size.to_be_bytes()[1..]);
+        res
+    }
 }
 
 impl<R: BufRead> Breadable<R> for FrameHeader {

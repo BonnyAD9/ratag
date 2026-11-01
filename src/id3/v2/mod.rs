@@ -1,6 +1,7 @@
 mod frame34;
 mod header;
 mod id3v2;
+mod unparsed_mode;
 mod v2_2;
 mod v2_3;
 mod v2_4;
@@ -16,7 +17,7 @@ use crate::{
     Comment, DataType, Error, Picture, PictureKind, Popularimeter, Rating,
     Result, TagStore, Trap, TrapExt,
     bread::Bread,
-    id3::get_genre,
+    id3::{get_genre, v2::unparsed_mode::UnparsedMode},
     parsers::{self, DateTime},
 };
 
@@ -59,7 +60,14 @@ pub fn from_read(
     let header: Header = r.get()?;
 
     match header.major_version {
-        Header::MAJOR_VERSION2 => v2_2::from_bread(r, store, trap, header),
+        Header::MAJOR_VERSION2 => v2_2::from_bread(
+            r,
+            store,
+            trap,
+            header,
+            &mut vec![],
+            UnparsedMode::None,
+        ),
         Header::MAJOR_VERSION3 => v2_3::from_bread(r, store, trap, header),
         Header::MAJOR_VERSION4 => v2_4::from_bread(r, store, trap, header),
         _ => Err(Error::Unsupported("ID3v2 other version than 2, 3 and 4.")),
