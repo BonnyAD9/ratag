@@ -1,10 +1,6 @@
 use std::process::ExitCode;
 
-use ratag::{
-    Result, WriteMode,
-    id3::{self, v1::Id3v1Tag},
-    tag, trap,
-};
+use ratag::{Result, id3, tag, trap};
 
 fn main() -> ExitCode {
     match start() {
