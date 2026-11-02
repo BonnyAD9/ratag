@@ -58,6 +58,9 @@ pub enum Error {
     /// Ogg packet in vorbis stream is not vorbis packet.
     #[error("Ogg packet is not vorbis.")]
     OggPacketNotVorbis,
+    /// Ogg synchronization patter not found.
+    #[error("Ogg synchronization pattern not found.")]
+    OggDesynchronized,
     /// Vorbis framing bit is unset.
     #[error("Vorbis framing bit is unset.")]
     VorbisFramingBitUnset,

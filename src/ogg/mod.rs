@@ -172,11 +172,22 @@ pub fn any_from_read<
     let mut err_cnt = 0;
     let mut identified = false;
 
-    while r.expect(b"OggS")? {
+    loop {
+        if !r.expect(b"OggS")? {
+            if !identified {
+                return Err(Error::NoTag);
+            } else if streams.is_empty() {
+                break;
+            } else {
+                return Err(Error::OggDesynchronized);
+            }
+        }
+
         if !identified {
             store.set_tag_type(TagType::Ogg);
             identified = true;
         }
+
         let header: OggHeader = r.get()?;
         if header.version != 0 {
             return Err(Error::Unsupported("Ogg version other than 0"));
@@ -196,7 +207,7 @@ pub fn any_from_read<
                 stream_cnt += 1;
             }
         } else if streams.is_empty() {
-            return Ok(());
+            break;
         }
 
         let Entry::Occupied(mut se) =
