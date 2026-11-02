@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## future
+## v0.2.1
 ### New features
 - Add support for reading `Ogg Vorbis`.
 - Support reading pictures from `VorbisComment`.
