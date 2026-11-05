@@ -1,5 +1,6 @@
 # TODO
 - Improve readme (add example).
+- Reexport tag instead of containers in the top level.
 - Substitude encoding dependency.
 - Support opus.
 - Optimize vorbis comment implementation (read only requested fields).
