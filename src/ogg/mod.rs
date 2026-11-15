@@ -166,6 +166,7 @@ pub fn any_from_read<
     trap: &T,
 ) -> Result<()> {
     let mut r = Bread::new(r);
+    let mut segments = vec![];
 
     let mut streams = HashMap::new();
     let mut stream_cnt = 0;
@@ -192,11 +193,9 @@ pub fn any_from_read<
         if header.version != 0 {
             return Err(Error::Unsupported("Ogg version other than 0"));
         }
-        let len = r
-            .read_exact(header.page_segments as usize)?
-            .iter()
-            .map(|&a| a as usize)
-            .sum();
+        segments.clear();
+        r.read_exact_to(&mut segments, header.page_segments as usize)?;
+        let len = segments.iter().map(|s| *s as usize).sum();
         let page = r.read_exact(len)?;
 
         if header.header_type.is_bos() {
@@ -216,7 +215,10 @@ pub fn any_from_read<
             continue;
         };
 
-        let rem = match se.get_mut().read_page(&header, page, store, trap) {
+        let rem = match se
+            .get_mut()
+            .read_page(&header, &segments, page, store, trap)
+        {
             Ok(v) => !v,
             Err(Error::NoTag) => {
                 err_cnt += 1;

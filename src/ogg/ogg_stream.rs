@@ -10,6 +10,7 @@ pub trait OggStream<S, T> {
     fn read_page(
         &mut self,
         header: &OggHeader,
+        segments: &[u8],
         page: &[u8],
         store: &mut S,
         trap: &T,

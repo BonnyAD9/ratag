@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## future
+### Breaking changes
+- `ogg::OggStream::read_page` now takes additional argument for segments.
+- `ogg::OggPacketStream::next_page` now tages additional argument for segments.
+
+### Fixes
+- Fix ogg splitting into pages
+
 ## v0.2.1
 ### New features
 - Add support for reading `Ogg Vorbis`.

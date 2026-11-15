@@ -24,47 +24,48 @@ impl<S: TagStore, T: Trap> OggStream<S, T> for OggVorbisStream {
     fn read_page(
         &mut self,
         header: &OggHeader,
+        segments: &[u8],
         page: &[u8],
         store: &mut S,
         trap: &T,
     ) -> crate::Result<bool> {
-        let Some(packet) = self.stream.next_page(header, page) else {
-            return Ok(true);
-        };
-
-        if packet.len() < 7 {
-            return Err(Error::OggVorbisPacketTooShort);
-        }
-
-        if &packet[1..7] != b"vorbis" {
-            return Err(Error::OggPacketNotVorbis);
-        }
-
-        let mut r = Bread::new(Cursor::new(&packet[7..]));
-
-        // The identification header.
-        if packet[0] == 1 {
-            store.set_tag_type(TagType::Vorbis);
-            let header: IdentificationHeader = r.get()?;
-            if header.version != 0 {
-                return Err(Error::Unsupported(
-                    "Vorbis version other than 1.",
-                ));
+        for packet in self.stream.next_page(header, segments, page) {
+            if packet.len() < 7 {
+                return Err(Error::OggVorbisPacketTooShort);
             }
-            if !header.framing_bit {
-                trap.error(Error::VorbisFramingBitUnset)?;
-            }
-            return Ok(true);
-        }
 
-        // The comment header.
-        if packet[0] != 3 {
+            if &packet[1..7] != b"vorbis" {
+                return Err(Error::OggPacketNotVorbis);
+            }
+
+            let mut r = Bread::new(Cursor::new(&packet[7..]));
+
+            // The identification header.
+            if packet[0] == 1 {
+                store.set_tag_type(TagType::Vorbis);
+                let header: IdentificationHeader = r.get()?;
+                if header.version != 0 {
+                    return Err(Error::Unsupported(
+                        "Vorbis version other than 1.",
+                    ));
+                }
+                if !header.framing_bit {
+                    trap.error(Error::VorbisFramingBitUnset)?;
+                }
+                continue;
+            }
+
+            // The comment header.
+            if packet[0] != 3 {
+                return Ok(false);
+            }
+
+            vorbis_comment::from_bread(&mut r, store, trap, true)?;
+
+            // The tag is red.
             return Ok(false);
         }
 
-        vorbis_comment::from_bread(&mut r, store, trap, true)?;
-
-        // The tag is red.
-        Ok(false)
+        Ok(true)
     }
 }

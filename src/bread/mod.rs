@@ -24,6 +24,17 @@ impl<R: Read> Bread<R> {
         Ok(&self.buf)
     }
 
+    pub fn read_exact_to(
+        &mut self,
+        res: &mut Vec<u8>,
+        len: usize,
+    ) -> Result<()> {
+        let pos = res.len();
+        res.resize(pos + len, 0);
+        self.read.read_exact(&mut res[pos..])?;
+        Ok(())
+    }
+
     pub fn read_exact_owned(&mut self, len: usize) -> Result<Vec<u8>> {
         let mut buf = vec![0; len];
         self.read.read_exact(&mut buf)?;
