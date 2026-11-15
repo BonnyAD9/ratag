@@ -5,6 +5,8 @@
 - `ogg::OggStream::read_page` now takes additional argument for segments.
 - `ogg::OggPacketStream::next_page` now tages additional argument for segments.
 - `vorbis` now doesn't reexport `vorbis_comment::*`.
+- `containers::*` is no longer reexported by the core module. Instead of it
+  `tag::*` is reexported.
 
 ### Fixes
 - Fix ogg splitting into pages

@@ -1,4 +1,4 @@
-use crate::PictureKind;
+use crate::containers::PictureKind;
 
 /// Type of data that can be within tag.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

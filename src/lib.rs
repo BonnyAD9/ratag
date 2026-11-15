@@ -5,7 +5,7 @@
 pub mod asf;
 mod atomic_swap;
 mod bread;
-mod containers;
+pub mod containers;
 mod data_type;
 mod err;
 /// Module for reading metadata from flac files.
@@ -43,13 +43,22 @@ use std::{
 };
 
 use crate::{
-    asf::Asf, bread::Bread, flac::Flac, id3::Id3, mp4::Mp4,
-    named_file::NamedFile, ogg::Ogg, riff::Riff, tag_write::TagWrite, trap::*,
+    asf::Asf, bread::Bread, containers::TagType, flac::Flac, id3::Id3,
+    mp4::Mp4, named_file::NamedFile, ogg::Ogg, riff::Riff,
+    tag_write::TagWrite, trap::*,
 };
 
 pub use self::{
-    containers::*, data_type::*, err::*, set_length::*, tag_format::*,
-    tag_read::*, tag_remove::*, tag_retrieve::*, tag_store::*, write_mode::*,
+    data_type::*,
+    err::*,
+    set_length::*,
+    tag::{Basic as BasicTag, *},
+    tag_format::*,
+    tag_read::*,
+    tag_remove::*,
+    tag_retrieve::*,
+    tag_store::*,
+    write_mode::*,
 };
 
 macro_rules! all_tags {

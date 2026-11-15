@@ -5,8 +5,9 @@ use self::frame_header::*;
 use std::io::{BufRead, Seek};
 
 use crate::{
-    DataType, Error, PictureKind, Result, TagStore, TagStoreExt, TagType,
+    DataType, Error, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
+    containers::PictureKind,
     id3::{
         genres::get_genre,
         v2::{

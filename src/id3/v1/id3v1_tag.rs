@@ -5,7 +5,9 @@ use std::{
 };
 
 use crate::{
-    Comment, Error, Result, TagRetrieve, TagStore, TagType, formatters,
+    Error, Result, TagRetrieve, TagStore, TagType,
+    containers::Comment,
+    formatters,
     id3::{
         genres::{GENRE_OTHER, get_genre, get_genre_id},
         v1::part_writer::PartWriter,

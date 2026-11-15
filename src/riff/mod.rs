@@ -15,9 +15,10 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Result, TagFormat, TagRead, TagStore,
-    TagStoreExt, TagType,
+    DataType, Error, Result, TagFormat, TagRead, TagStore, TagStoreExt,
+    TagType,
     bread::Bread,
+    containers::Comment,
     parsers::{self, DateTime},
     trap::Trap,
 };

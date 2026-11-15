@@ -1,4 +1,4 @@
-use crate::PictureKind;
+use crate::containers::PictureKind;
 
 /// Picture from tag.
 #[derive(Debug)]

@@ -7,9 +7,9 @@ use self::{frame_header::*, picture_header::*};
 use std::io::{BufRead, Seek};
 
 use crate::{
-    DataType, Error, Picture, PictureKind, Result, TagStore, TagStoreExt,
-    TagType,
+    DataType, Error, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
+    containers::{Picture, PictureKind},
     id3::v2::{
         encoding_null, header::Header, read_comment, read_date23,
         read_genres23, read_length, read_num_of, read_popularimeter,

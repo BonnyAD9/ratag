@@ -1,7 +1,8 @@
 use std::path::Path;
 
 use crate::{
-    DataType, Picture as Pic, PictureKind, Result, TagRetrieve, TagStore,
+    DataType, Result, TagRetrieve, TagStore,
+    containers::{Picture as Pic, PictureKind},
     read_tag_from_file, trap,
 };
 

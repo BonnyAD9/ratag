@@ -4,7 +4,8 @@ use std::{
 
 use encoding::{DecoderTrap, EncoderTrap};
 use ratag::{
-    Error, Result, TagStore, TagType, read_tag_from_file, tag, trap::Trap,
+    Error, Result, TagStore, containers::TagType, read_tag_from_file, tag,
+    trap::Trap,
 };
 
 const EXTENSIONS: &[&str] = &[

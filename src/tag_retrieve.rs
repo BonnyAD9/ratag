@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::{Comment, Rating, containers::Picture};
+use crate::containers::{Comment, Picture, Rating};
 
 /// The opposite of [`crate::TagStore`]. Trait for tag containers that can
 /// provide their fields, usually to be written.

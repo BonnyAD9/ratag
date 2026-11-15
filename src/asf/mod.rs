@@ -13,8 +13,11 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Picture, PictureKind, Rating, Result, TagFormat,
-    TagRead, TagStore, TagType, bread::Bread, parsers, trap::Trap,
+    DataType, Error, Result, TagFormat, TagRead, TagStore, TagType,
+    bread::Bread,
+    containers::{Comment, Picture, PictureKind, Rating},
+    parsers,
+    trap::Trap,
 };
 
 const STR: u16 = 0;

@@ -1,6 +1,10 @@
 use std::time::Duration;
 
-use crate::{Comment, DataType, Picture, Rating, TagType, parsers::DateTime};
+use crate::{
+    DataType, TagType,
+    containers::{Comment, Picture, Rating},
+    parsers::DateTime,
+};
 
 /// Generic storage for data from tag.
 #[allow(unused_variables)]

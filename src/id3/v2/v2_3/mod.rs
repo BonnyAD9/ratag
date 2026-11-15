@@ -3,8 +3,9 @@ mod frame_header;
 use std::io::{BufRead, Seek};
 
 use crate::{
-    DataType, Error, PictureKind, Result, TagStore, TagStoreExt, TagType,
+    DataType, Error, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
+    containers::PictureKind,
     id3::v2::{
         frame34, header::Header, read_comment, read_date23, read_genres23,
         read_length, read_num_of, read_picture34, read_popularimeter,

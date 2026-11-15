@@ -1,4 +1,4 @@
-use crate::Popularimeter;
+use crate::containers::Popularimeter;
 
 /// Rating of a song.
 #[derive(Debug, Clone)]

@@ -4,9 +4,9 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, PictureKind, Result, TagStore, TagStoreExt,
-    TagType,
+    DataType, Error, Result, TagStore, TagStoreExt, TagType,
     bread::Bread,
+    containers::{Comment, PictureKind},
     flac,
     parsers::{self, DateTime},
     trap::{Trap, TrapExt},

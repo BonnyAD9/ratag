@@ -13,9 +13,9 @@ use std::{
 };
 
 use crate::{
-    Comment, DataType, Error, Picture, PictureKind, Popularimeter, Rating,
-    Result, TagStore, Trap, TrapExt,
+    DataType, Error, Result, TagStore, Trap, TrapExt,
     bread::Bread,
+    containers::{Comment, Picture, PictureKind, Popularimeter, Rating},
     id3::get_genre,
     parsers::{self, DateTime},
 };

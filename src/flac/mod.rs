@@ -16,8 +16,11 @@ use std::{
 };
 
 use crate::{
-    DataType, Error, Picture, PictureKind, Result, TagFormat, TagRead,
-    TagStore, TagType, bread::Bread, trap::Trap, vorbis_comment,
+    DataType, Error, Result, TagFormat, TagRead, TagStore, TagType,
+    bread::Bread,
+    containers::{Picture, PictureKind},
+    trap::Trap,
+    vorbis_comment,
 };
 
 // Implementation is based on: https://www.rfc-editor.org/rfc/rfc9639.html
